@@ -28,7 +28,7 @@ Bvalues = [
   0, 250, 500, 1000, 3000
 ]
 
-cmap = mpl.cm.get_cmap("plasma", len(Bvalues))
+cmap = mpl.cm.get_cmap("jet", len(Bvalues))
 # colors = cmap(np.arange(len(files)))
 # colors[-1] = (1, 0, 0, 1)
 
