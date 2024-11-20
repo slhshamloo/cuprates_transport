@@ -79,7 +79,7 @@ for i, B in enumerate(Bvalues):
 # hline for imaginary part
 
   ######################################################
-axs[0].legend(loc = 1, fontsize = 16, ncols=3, frameon = False, numpoints=1, markerscale = 1, handletextpad=0.5)
+axs[1].legend(loc = 3, fontsize = 14, ncols=3, frameon = False, numpoints=1, markerscale = 1, handletextpad=0.5)
 # axs[1].legend(loc = 3, fontsize = 16, frameon = False, numpoints=1, markerscale = 1, handletextpad=0.5)
 # axs.legend(bbox_to_anchor=(0.5, 0.5), loc = 1, fontsize = 12, frameon = False, numpoints=1, markerscale = 1, handletextpad=0.5)
 ######################################################
@@ -90,6 +90,9 @@ for ax in axs:
 axs[1].axhline(y=0, ls ="--", c ="k", linewidth=0.6)
 
 axs[0].set_ylim(0) # leave the ymax auto, but fix ymin
+axs[1].set_ylim(-12) # leave the ymax auto, but fix ymin
+fig.text(0.79,0.79, "Free electrons", ha = "right")
+
 # axs.set_xscale('log')
 # axs.set_yscale('log')
 
