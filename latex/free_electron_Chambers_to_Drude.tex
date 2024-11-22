@@ -43,4 +43,16 @@ Plugging the definition of $v_F$ we get:
 	= \frac{4\pi}{3}k_F^3\frac{1}{m^*}
 	= \frac{n}{m^*}
 \]
+
+We can explicitly compute the integration by parts:
+\begin{align*}
+	I &= \int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \cos{(\phi + \omega_c s)} \\
+	&= \left[ \frac{e^{-(i\omega + \Gamma)s}}{-(i\omega + \Gamma)} \cos{(\phi + \omega_c s)} \right]_{0}^{\infty} - \frac{\omega_c}{i\omega + \Gamma} \int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \sin{(\phi + \omega_c s)} \\
+	&= \frac{1}{i\omega + \Gamma}\left(\cos{\phi} - \omega_c \int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \sin{(\phi + \omega_c s)}\right) \\
+	&= \frac{1}{i\omega + \Gamma}\left(\cos{\phi} - \omega_c \left( \left[ \frac{e^{-(i\omega + \Gamma)s}}{-(i\omega + \Gamma)} \sin{(\phi + \omega_c s)} \right]_{0}^{\infty} + \frac{\omega_c}{i\omega + \Gamma} \int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \cos{(\phi + \omega_c s)}\right) \right)\\
+	I &= \frac{1}{i\omega + \Gamma}\left(\cos{\phi} - \omega_c \left(\frac{\omega_c}{i\omega + \Gamma} I\right) \right)\\
+\end{align*}
+Thus : $$\left(1+ \frac{\omega_c^2}{(i\omega + \Gamma)^2}\right)I &= \frac{\cos{\phi}}{i\omega + \Gamma}$$
+And it follows that: $$ I = \cos{\phi} \frac{i\omega + \Gamma}{\omega_c^2 + (i\omega + \Gamma)^2} $$
+
 \end{document}
