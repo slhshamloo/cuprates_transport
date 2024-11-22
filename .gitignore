@@ -13,6 +13,7 @@ doc/readme_units_conversion_ADMR.pdf
 
 # User generated data and plots
 data/**/*.dat
+data/**/*.csv
 plots/**/*.pdf
 
 user_plots/*
