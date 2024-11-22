@@ -18,6 +18,9 @@ plots/**/*.pdf
 user_plots/*
 user_data/*
 
+# Latex generated files
+latex/*.pdf
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

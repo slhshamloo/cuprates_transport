@@ -1,0 +1,46 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath}
+\newcommand\myeq{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily IBPx2}}}{=}}}
+
+\begin{document}
+
+We are considering a free electron dispersion, it is isotropic in $\vec{k}$-space :
+\begin{itemize}
+	\item We have the energy dispersion : $E(k) = \mu + \frac{\hbar^2}{2m^*}k^2$
+	\item The scattering rate is uniform and we write $\frac{1}{\tau}= \Gamma$ 
+	\item The Fermi surface is a sphere of radius $k_F$ with $\vec{k} = k_F\hat{e}_r$
+	\item On the FS, $\vec{v_F} = \frac{1}{\hbar}\frac{\partial E(\vec{k})}{\partial\vec{k}} = \frac{1}{\hbar}\frac{\hbar^2}{2m^*}2k_F\hat{e}_r = \frac{\hbar}{m^*}k_F\hat{e}_r$
+\end{itemize} 
+
+With these definitions in mind, we can apply Chambers' formula\ref{}, where $\hbar\equiv1$ was set : 
+
+\begin{align*}
+	\sigma_{xx} &= e^2\displaystyle\int_{\vec{k}}^{FS}\mathop{d\vec{k}\int_0^{\infty}\mathop{ds}
+		v_x(\vec{k}(s))\hat{v}_x(\vec{k})
+		\exp{\left(-i\omega s - \int_0^s \frac{\mathop{ds'}}{\tau (\vec{k}(s')}}\right)} \\
+	&= e^2\displaystyle\int_{\vec{k}}^{FS}\mathop{d\vec{k}}\int_0^{\infty}\mathop{ds}
+		v_x(\vec{k}(s))\hat{v}_x(\vec{k})
+		e^{-(i\omega + \Gamma)s} \\
+	&= e^2\displaystyle\int_{\vec{k}, k = k_F}^{}\mathop{d\vec{k}} \hat{v}_x(\vec{k}) 
+		\int_0^{\infty}\mathop{ds} v_x(\vec{k}(s)) e^{-(i\omega + \Gamma)s} \\
+	&= e^2\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi}\ k_F^2\sin{\theta}\mathop{d\phi}\mathop{d\theta} (\hat{e}_r(\theta, \phi)\cdot \hat{e}_x)
+		\int_0^{\infty}\mathop{ds} v_F (\hat{e}_r(\theta(s), \phi(s))\cdot \hat{e}_x) e^{-(i\omega + \Gamma)s} \\
+	&= e^2k_F^2v_F\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi}\ \sin{\theta}\mathop{d\phi}\mathop{d\theta} \sin{\theta}\cos{\phi}
+		\int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \sin{\theta(s)}\cos{\phi(s)}\\
+	&= e^2k_F^2v_F\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi} \mathop{d\phi}\mathop{d\theta} \sin^3{\theta}\cos{\phi}
+		\int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \cos{(\phi + \omega_c s)} \\
+	&\myeq e^2k_F^2v_F\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi} \mathop{d\phi}\mathop{d\theta} \sin^3{\theta}\cos^2{\phi}\frac{\Gamma + i\omega}{\omega_c^2 + (\Gamma +i\omega)^2} \\
+	&= i\frac{\omega - i\Gamma}{\omega_c^2 - (\omega - i\Gamma)^2}e^2k_F^2v_F\frac{4\pi}{3} = -i\frac{\omega - i\Gamma}{(\omega - i\Gamma)^2 - \omega_c^2}e^2k_F^2v_F\frac{4\pi}{3} \\
+\end{align*}
+
+Let us now show that this is the same prefactor as in the Drude formula result : 
+\[ \sigma_{xx}^{Drude} = -i \frac{ne^2}{m^*} \frac{\omega-i\Gamma}{(\omega - i\Gamma)^2 - \omega_c^2}\]
+That is, that $\frac{n}{m^*}= \frac{4\pi}{3}k_F^2\frac{v_F}{\hbar}$ (we reintroduce the $\hbar$ factor that was initially set to 1). \\
+Plugging the definition of $v_F$ we get:
+\[
+	\frac{4\pi}{3}k_F^2\frac{v_F}{\hbar} =\frac{4\pi}{3}k_F^2\frac{\frac{\hbar}{m^*}k_F}{\hbar}
+	= \frac{4\pi}{3}k_F^3\frac{1}{m^*}
+	= \frac{n}{m^*}
+\]
+\end{document}
