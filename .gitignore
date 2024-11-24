@@ -21,6 +21,15 @@ user_data/*
 
 # Latex generated files
 latex/*.pdf
+latex/*.aux
+latex/*.log
+latex/*.out
+latex/*.synctex.gz
+latex/*.toc
+latex/*.bbl
+latex/*.blg
+latex/*.fdb_latexmk
+latex/*.fls
 
 
 # Byte-compiled / optimized / DLL files
