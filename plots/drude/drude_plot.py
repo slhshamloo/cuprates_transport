@@ -59,7 +59,7 @@ def generate_figure(omega_min, omega_l_max, sigma1_min, size = (8, 8)):
         ax.tick_params(axis='x', which='major', pad=7)
         ax.tick_params(axis='y', which='major', pad=8)
         ax.set_ylabel(
-            fr"$\sigma_{i + 1} (\mathrm{{m}}\Omega^-1\mathrm{{cm}}^-1)$",
+            fr"$\sigma_{i + 1}\ (\mathrm{{m}}\Omega^-1\mathrm{{cm}}^-1)$",
             labelpad=8)
     sigma_l_pos = omega_l_max - (omega_l_max - omega_min) * 0.2
     axs[0].text(sigma_l_pos, sigma1_min, r"$\sigma_l$", ha="center")
