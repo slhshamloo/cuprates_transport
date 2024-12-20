@@ -58,11 +58,13 @@ def generate_figure(omega_min, omega_l_max, sigma1_min, size = (8, 8)):
         # ax.axvline(x=0, ls =':', c ="k", lw=1.0)
         ax.tick_params(axis='x', which='major', pad=7)
         ax.tick_params(axis='y', which='major', pad=8)
-        ax.set_ylabel(fr"$\sigma_{i + 1} $", labelpad=8)
-    sigma_l_pos = omega_l_max - (omega_l_max - omega_min) * 0.1
+        ax.set_ylabel(
+            fr"$\sigma_{i + 1} (\mathrm{{m}}\Omega^-1\mathrm{{cm}}^-1$",
+            labelpad=8)
+    sigma_l_pos = omega_l_max - (omega_l_max - omega_min) * 0.2
     axs[0].text(sigma_l_pos, sigma1_min, r"$\sigma_l$", ha="center")
     axs[0].text(-sigma_l_pos, sigma1_min, r"$\sigma_r$", ha="center")
-    fig.supxlabel(r"Frequency (THz)")
+    axs[1].set_xlabel("Frequency (THz)", labelpad=8)
     fig.align_ylabels()
     return fig, axs
 
@@ -102,11 +104,11 @@ def plot_data(axs, omega, sigma, fit, field, color):
             data_lines.append(*ax.plot(
                 omega_data, sigma_data, c=color, lw=4,
                 label=r"$\omega_{pn}^2="
-                    fr"{1e-6 * fit.params['omega_pn_sq'].value:.3}, "
+                    fr"{fit.params['omega_pn_sq'].value:.2}, "
                     r"\omega_{ps}^2="
-                    f"{1e-6 * fit.params['omega_ps_sq'].value:.3},$\n"
-                    fr"$\omega_c={fit.params['omega_c'].value:.3}, "
-                    fr"\Gamma={fit.params['gamma'].value:.3}$"))
+                    f"{fit.params['omega_ps_sq'].value:.2},$\n"
+                    fr"$\omega_c={fit.params['omega_c'].value:.2}, "
+                    fr"\Gamma={fit.params['gamma'].value:.2}$"))
         fit_lines.append(*ax.plot(omega_fit, sigma_fit, c=color,
                                   lw=2, ls="--", label=f"{field} T"))
     return data_lines, fit_lines
@@ -145,12 +147,13 @@ def plot_post(temperature):
     for artist, color, pos_scale, ha, xpos in zip(
             artists, colors, [0.85, 0.6, 0.25, 0.0],
             ["left", "left", "right", "right"],
-            [omega_min * 1.05, omega_min * 1.05,
-             omega_max * 1.05, omega_max * 1.05]):
+            [omega_min * 1.2, omega_min * 1.2,
+             omega_max * 1.2, omega_max * 1.2]):
         axs[1].text(
             xpos, sigma2_min + (sigma2_max - sigma2_min) * pos_scale,
             artist.get_label(), color=color, ha=ha)
 
+    axs[1].set_xlim(omega_min * 1.25, omega_max * 1.25)
     fig.tight_layout()
     return fig, axs
 
