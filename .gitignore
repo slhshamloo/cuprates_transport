@@ -16,6 +16,9 @@ data/**/*.dat
 data/**/*.csv
 plots/**/*.pdf
 
+data_processing/**/*.dat
+data_processing/**/*.pickle
+
 user_plots/*
 user_data/*
 
