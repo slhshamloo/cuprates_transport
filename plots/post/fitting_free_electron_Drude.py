@@ -149,27 +149,27 @@ mpl.rcParams['pdf.fonttype'] = 3  # Output Type 3 (Type3) or Type 42 (TrueType),
 
 fig, axs = plt.subplots(2, 1, figsize = (9.2, 5.6)) # (1,1) means one plot, and figsize is w x h in inch of figure
 
-fig.subplots_adjust(left = 0.18, right = 0.82, bottom = 0.18, top = 0.95) # adjust the box of axes regarding the figure size
+fig.subplots_adjust(left = 0.15, right = 0.82, bottom = 0.18, top = 0.98) # adjust the box of axes regarding the figure size
 
 # axes.axhline(y=0, ls ="--", c ="k", linewidth=0.6)
 
 #############################################
 fig.text(0.2,0.8, "LSCO\n"+r"$p=0.16$")
-fig.text(0.6,0.26, fr"$B={B}$ T")
-fig.text(0.6,0.2, fr"$T={T}$ K")
+fig.text(0.65,0.28, fr"$B={B}$ T")
+fig.text(0.65,0.22, fr"$T={T}$ K")
 #############################################
-tble = axs[0].table([[""],[fr"$\Gamma$={round(gamma, 3)}"],
-                     [r"$\epsilon_{\infty}$"+f"={round(epsilon_inf, 3)}"],
-                     [r"$\omega_c$"+f"={round(omega_c, 3)}"],
-                     [r"$\omega_{ps}$"+f"={round(omega_ps, 3)}"],
-                     [r"$\omega_{pn}$"+f"={round(omega_pn, 3)}"]]
+tble = axs[0].table([[""],[fr"$\Gamma$ = {round(gamma, 3)}"],
+                     [r"$\omega_{\rm{c}}$"+f" = {round(omega_c, 3)}"],
+                     [r"$\omega_{\rm{ps}}$"+f" = {round(omega_ps, 3)}"],
+                     [r"$\omega_{\rm{pn}}$"+f" = {round(omega_pn, 3)}"],
+                     [r"$\epsilon_{\infty}$"+f" = {round(epsilon_inf, 3)}"],]
                      ,cellLoc="left", colWidths=[0.3], loc=14, fontsize=0.01, edges="open")
 
-if not vary["gamma"]: tble[(1, 0)].get_text().set_color('gray')
-if not vary["epsilon_inf"]: tble[(2, 0)].get_text().set_color('gray')
-if not vary["omega_c"]: tble[(3, 0)].get_text().set_color('gray')
-if not vary["omega_ps"]: tble[(4, 0)].get_text().set_color('gray')
-if not vary["omega_pn"]: tble[(5, 0)].get_text().set_color('gray')
+tble[(1, 0)].get_text().set_color('red') if vary["gamma"] else tble[(1, 0)].get_text().set_color('black')
+tble[(2, 0)].get_text().set_color('red') if vary["omega_c"] else tble[(2, 0)].get_text().set_color('black')
+tble[(3, 0)].get_text().set_color('red') if vary["omega_ps"] else tble[(3, 0)].get_text().set_color('black')
+tble[(4, 0)].get_text().set_color('red') if vary["omega_pn"] else tble[(4, 0)].get_text().set_color('black')
+tble[(5, 0)].get_text().set_color('red') if vary["epsilon_inf"] else tble[(5, 0)].get_text().set_color('black')
 
 tble.scale(1, 3)
 tble.set_fontsize(16)
@@ -189,7 +189,7 @@ axs[0].get_xaxis().set_ticklabels([])
 
 color = 'k'
 line = axs[0].plot(x_fit, np.real(y_fit), label = r"fit")
-plt.setp(line, ls =":", c = color, lw = 2, marker = "", mfc = color, ms = 7, mec = color, mew= 2)
+plt.setp(line, ls ="--", c = color, lw = 3, marker = "", mfc = color, ms = 7, mec = color, mew= 2)
 
 
 indices = np.argsort(x_data_r)
@@ -207,8 +207,8 @@ plt.setp(line1, ls ="-", c = color, lw = 3, marker = "", mfc = color, ms = 7, me
 color = 'k'
 line = axs[1].plot(x_fit[x_fit>0.1], np.imag(y_fit[x_fit>0.1]), label = r"fit")
 line1 = axs[1].plot(x_fit[x_fit<-0.1], np.imag(y_fit[x_fit<-0.1]), label = r"")
-plt.setp(line, ls =":", c = color, lw = 2, marker = "", mfc = color, ms = 7, mec = color, mew= 2)
-plt.setp(line1, ls =":", c = color, lw = 2, marker = "", mfc = color, ms = 7, mec = color, mew= 2)
+plt.setp(line, ls ="--", c = color, lw = 3, marker = "", mfc = color, ms = 7, mec = color, mew= 2)
+plt.setp(line1, ls ="--", c = color, lw = 3, marker = "", mfc = color, ms = 7, mec = color, mew= 2)
 
 indices = np.argsort(x_data_i)
 x_data_i = np.sort(x_data_i)
