@@ -98,6 +98,7 @@ pars.add("gamma", value = 1e0, vary=vary["gamma"], min=0)
 pars.add("omega_pn", value = 1e4, vary=vary["omega_pn"], min=0)
 pars.add("omega_ps", value = 1e2, vary=vary["omega_ps"], min=0)
 pars.add("omega_c", value = omega_c_zero,  vary=vary["omega_c"])
+pars.add("epsilon_inf", value = 1,  vary=vary["epsilon_inf"])
 
 
 out = minimize(compute_diff, pars, args=(x_data_r, x_data_i, y_data_r, y_data_i))
@@ -106,6 +107,7 @@ gamma = out.params["gamma"].value # Gamma in rad.THz
 omega_pn = out.params["omega_pn"].value # OmegaPN in rad**2.THz**2
 omega_ps = out.params["omega_ps"].value
 omega_c = out.params["omega_c"].value # Omegac in rad.THz
+epsilon_inf= out.params["epsilon_inf"].value # 
 
 fullpath = os.path.relpath(__file__)
 dataname = f"{fullpath[0:-3]}__T_{T}_B_{B}.dat"
@@ -153,8 +155,24 @@ fig.subplots_adjust(left = 0.18, right = 0.82, bottom = 0.18, top = 0.95) # adju
 
 #############################################
 fig.text(0.2,0.8, "LSCO\n"+r"$p=0.16$")
+fig.text(0.6,0.26, fr"$B={B}$ T")
+fig.text(0.6,0.2, fr"$T={T}$ K")
 #############################################
-#plt.table([["omega_c","omega_c"], ["gamma", "gamma"]],cellLoc="center",loc=14, fontsize=0.01)
+tble = axs[0].table([[""],[fr"$\Gamma$={round(gamma, 3)}"],
+                     [r"$\epsilon_{\infty}$"+f"={round(epsilon_inf, 3)}"],
+                     [r"$\omega_c$"+f"={round(omega_c, 3)}"],
+                     [r"$\omega_{ps}$"+f"={round(omega_ps, 3)}"],
+                     [r"$\omega_{pn}$"+f"={round(omega_pn, 3)}"]]
+                     ,cellLoc="left", colWidths=[0.3], loc=14, fontsize=0.01, edges="open")
+
+if not vary["gamma"]: tble[(1, 0)].get_text().set_color('gray')
+if not vary["epsilon_inf"]: tble[(2, 0)].get_text().set_color('gray')
+if not vary["omega_c"]: tble[(3, 0)].get_text().set_color('gray')
+if not vary["omega_ps"]: tble[(4, 0)].get_text().set_color('gray')
+if not vary["omega_pn"]: tble[(5, 0)].get_text().set_color('gray')
+
+tble.scale(1, 3)
+tble.set_fontsize(16)
 #############################################
 for i in range(2):
     axs[i].set_xlim(1.2*x_min, 1.2*x_max)   # limit for xaxis
@@ -162,8 +180,8 @@ for i in range(2):
     axs[i].tick_params(axis='x', which='major', pad=7)
     axs[i].tick_params(axis='y', which='major', pad=8)
 #############################################
-axs[0].set_ylabel(r"Re($\sigma$) ( m$\Omega^{-1}$ cm$^{-1}$ )", labelpad = 8)
-axs[1].set_ylabel(r"Im($\sigma$) ( m$\Omega^{-1}$ cm$^{-1}$ )", labelpad = 8)
+axs[0].set_ylabel(r"Re($\sigma$)", labelpad = 8)
+axs[1].set_ylabel(r"Im($\sigma$)", labelpad = 8)
 axs[1].set_xlabel(r"$\omega$ ( THz )", labelpad = 8)
 axs[0].get_xaxis().set_ticklabels([])
 
