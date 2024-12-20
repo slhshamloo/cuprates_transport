@@ -1,0 +1,122 @@
+import pickle
+import numpy as np
+from lmfit import minimize, Parameters
+from scipy.constants import epsilon_0
+
+epsilon_0 = epsilon_0 * 1e7
+
+
+def load_data(paper, sample, mag_field):
+    omega_l, sigma1l = np.loadtxt(
+        f"data/{paper}/{sample}_sigma1l_{mag_field}T.csv",
+        skiprows=1, delimiter=',', unpack=True)
+    omega_r, sigma1r = np.loadtxt(
+        f"data/{paper}/{sample}_sigma1r_{mag_field}T.csv",
+        skiprows=1, delimiter=',', unpack=True)
+    omega_l_2, sigma2l = np.loadtxt(
+        f"data/{paper}/{sample}_sigma2l_{mag_field}T.csv",
+        skiprows=1, delimiter=',', unpack=True)
+    omega_r_2, sigma2r = np.loadtxt(
+        f"data/{paper}/{sample}_sigma2r_{mag_field}T.csv",
+        skiprows=1, delimiter=',', unpack=True)
+    sigma2l = np.interp(omega_l, omega_l_2, sigma2l)
+    sigma2r = np.interp(omega_r, omega_r_2, sigma2r)
+    omega = np.concatenate((omega_l, omega_r))
+    sigma1 = np.concatenate((sigma1l, sigma1r))
+    sigma2 = np.concatenate((sigma2l, sigma2r))
+    sigma = sigma1 + 1j * sigma2
+    return omega, sigma
+
+
+## Fit ///////////////////////////////////////////////////////////////////////
+def fitting_model(omega, omega_pn_sq, omega_ps_sq, omega_c, gamma):
+    return 1j * epsilon_0 * (omega_pn_sq / (omega - omega_c + 1j * gamma)
+                             + omega_ps_sq / omega)
+
+
+def compute_diff(pars, omega, data):
+    sim = fitting_model(
+        omega, pars["omega_pn_sq"].value, pars["omega_ps_sq"].value,
+        pars["omega_c"].value, pars["gamma"].value)
+    return np.abs(sim - data)**2
+
+
+def generate_pars():
+    pars = Parameters()
+    pars.add("omega_pn_sq", value=1e5, min=0)
+    pars.add("omega_ps_sq", value=1e3, min=0)
+    pars.add("omega_c", value=0.1, min=0)
+    pars.add("gamma", value=1, min=0)
+    return pars
+
+
+def fit_data(pars, omega, sigma):
+    return minimize(compute_diff, pars, args=(omega, sigma))
+
+
+## Batch fitting ////////////////////////////////////////////////////////////////
+def generate_fits(paper, sample, fields):
+    fits = {}
+    for field in fields:
+        omega, sigma = load_data(paper, sample, field)
+        pars = generate_pars()
+        out = fit_data(pars, omega, sigma)
+        fits[field] = out
+    return fits
+
+
+def generate_post_fits():
+    fit_sets = {}
+    for temperature in range(35, 55, 5):
+        fit_sets[f"post_{temperature}K"] = generate_fits(
+            "post", f"post{temperature}", [0, 9, 20, 31])
+    return fit_sets
+
+
+def generate_legros_fits():
+    fit_sets = {}
+    for sample in ["NSC", "OD13K", "OD17K", "OD35K", "OD36K", "UD39K"]:
+        fit_sets[f"legros_{sample}"] = generate_fits(
+            "legros", sample, [0, 4, 9, 14, 20, 31])
+    return fit_sets
+
+
+def generate_and_save_fits():
+    with open("user_data/post_fits.pkl", "wb") as f:
+        pickle.dump(generate_post_fits(), f)
+    with open("user_data/legros_fits.pkl", "wb") as f:
+        pickle.dump(generate_legros_fits(), f)
+
+
+def generate_fit_csv():
+    with open("user_data/post_fits.pkl", "rb") as f:
+        post_fits = pickle.load(f)
+    with open("user_data/legros_fits.pkl", "rb") as f:
+        legros_fits = pickle.load(f)
+    with open("user_data/fit_data.csv", "w") as f:
+        f.write("paper,sample,field,omega_pn_sq,"
+                "omega_ps_sq,omega_c,gamma\n")
+        for paper, fits in [("post", post_fits), ("legros", legros_fits)]:
+            for sample, fit_set in fits.items():
+                for field, fit in fit_set.items():
+                    omega_pn_sq, omega_ps_sq, omega_c, gamma = \
+                        get_fit_params(fit)
+                    f.write(f"{paper},{sample},{field},{omega_pn_sq},"
+                            f"{omega_ps_sq},{omega_c},{gamma}\n")
+
+
+def get_fit_params(fit):
+    omega_pn_sq = fit.params["omega_pn_sq"].value
+    omega_ps_sq = fit.params["omega_ps_sq"].value
+    omega_c = fit.params["omega_c"].value
+    gamma = fit.params["gamma"].value
+    return omega_pn_sq, omega_ps_sq, omega_c, gamma
+
+
+def main():
+    generate_and_save_fits()
+    generate_fit_csv()
+
+
+if __name__ == "__main__":
+    main()
