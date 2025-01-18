@@ -16,30 +16,13 @@ vary = {
     "epsilon_inf": False
 }
 
-## Field and Temperature values to probe
-labels = [
-    "post35", "post40", "post45", "post50"  
-]
 
-temperatures = [
-    35, 40, 45, 50
-]
-
-dopings = [
-    0.16, 0.16, 0.16, 0.16
-]
-
-fields = [
-    0, 9, 20, 31
-]
-
-
-def plotOnce(label, doping, T, B):
+def plotOnce(folder, label, doping, T, B):
     ## Load Data /////////////////////////////////////////////////////////////////////
     fullpath = os.path.relpath(__file__)
     dirname, fname = os.path.split(fullpath)
     project_root = dirname + "/../../"
-    datapath = project_root+"data/post"
+    datapath = project_root + f"data/{folder}"
 
     # Handle the real part
     x_data, y_data = [], []
@@ -75,21 +58,22 @@ def plotOnce(label, doping, T, B):
 
 
     ## Fit ///////////////////////////////////////////////////////////////////////////
-    def fit_model(omega, gamma, omega_pn, omega_c, omega_ps):
+    def fit_model(omega, gamma, omega_pn_sq, omega_c, omega_ps_sq, epsilon_inf=1):
         """Compute optical conductivity in the Drude model with given parameters
 
         All parameters must be given in THz and the result is in (mOhm.cm)^-1"""
         e0 = 8.854e-12
-        return 1j*1e7*e0*(2*np.pi*omega_pn)**2/(2*np.pi*omega - omega_c + 1j*gamma) + 1j*(2*np.pi*omega_ps)**2/omega
+        return 1j * 1e7 * e0 * (omega_pn_sq /(omega - omega_c + 1j*gamma)
+                                + omega_ps_sq / omega - omega * (epsilon_inf - 1))
 
 
     def compute_diff(pars, reals, imags, d_real, d_imag):
-        gamma   = pars["gamma"].value
-        omega_pn  = pars["omega_pn"].value
+        gamma = pars["gamma"].value
+        omega_pn_sq  = pars["omega_pn_sq"].value
         omega_c = pars["omega_c"].value
-        omega_ps = pars["omega_ps"].value
-        sim_r = np.real(fit_model(reals, gamma, omega_pn, omega_c, omega_ps))
-        sim_imag = np.imag(fit_model(imags, gamma, omega_pn, omega_c, omega_ps))
+        omega_ps_sq = pars["omega_ps_sq"].value
+        sim_r = np.real(fit_model(reals, gamma, omega_pn_sq, omega_c, omega_ps_sq))
+        sim_imag = np.imag(fit_model(imags, gamma, omega_pn_sq, omega_c, omega_ps_sq))
         return np.concatenate([sim_r - d_real, sim_imag - d_imag])
 
 
@@ -99,23 +83,23 @@ def plotOnce(label, doping, T, B):
     omega_c_zero = 1e-12*e*B/(2*me) # Cyclotron frequency in rad.THz
 
     pars = Parameters()
-    pars.add("gamma", value = 1e0, vary=vary["gamma"], min=0)
-    pars.add("omega_pn", value = 1e4, vary=vary["omega_pn"], min=0)
-    pars.add("omega_ps", value = 1e2, vary=vary["omega_ps"], min=0)
-    pars.add("omega_c", value = omega_c_zero,  vary=vary["omega_c"])
+    pars.add("gamma", value = 1, vary=vary["gamma"], min=0)
+    pars.add("omega_pn_sq", value = 1e5, vary=vary["omega_pn"], min=0)
+    pars.add("omega_ps_sq", value = 1e3, vary=vary["omega_ps"], min=0)
+    pars.add("omega_c", value = 0.1,  vary=vary["omega_c"], min=0)
     pars.add("epsilon_inf", value = 1,  vary=vary["epsilon_inf"])
 
 
     out = minimize(compute_diff, pars, args=(x_data_r, x_data_i, y_data_r, y_data_i))
 
     gamma = out.params["gamma"].value # Gamma in rad.THz
-    omega_pn = out.params["omega_pn"].value # OmegaPN in rad**2.THz**2
-    omega_ps = out.params["omega_ps"].value
+    omega_pn_sq = out.params["omega_pn_sq"].value # OmegaPN in rad**2.THz**2
+    omega_ps_sq = out.params["omega_ps_sq"].value
     omega_c = out.params["omega_c"].value # Omegac in rad.THz
     epsilon_inf= out.params["epsilon_inf"].value # 
 
-    fullpath = os.path.relpath(__file__)
-    dataname = f"user_data/post/{fullpath[0:-3]}_{label}_{B}T.dat"
+    dataname = (project_root + f"user_data/{folder}/"
+                + f"fitting_free_electron_Drude_{label}_{B}T.dat")
 
     with open(dataname, 'w') as sys.stdout:
         report_fit(out)
@@ -125,7 +109,8 @@ def plotOnce(label, doping, T, B):
     x_max = 2
 
     x_fit = np.linspace(x_min, x_max, 1000)
-    y_fit = fit_model(x_fit, gamma, omega_pn, omega_c, omega_ps)
+    y_fit = fit_model(x_fit, gamma, omega_pn_sq, omega_c,
+                      omega_ps_sq, epsilon_inf)
 
 
     ##############################################################################
@@ -163,11 +148,11 @@ def plotOnce(label, doping, T, B):
     fig.text(0.79,0.28, fr"$B=${B} T", ha="right")
     fig.text(0.79,0.22, fr"$T=${label[-2:]} K", ha="right")
     #############################################
-    tble = axs[0].table([[""],[fr"$\Gamma$ = {round(gamma, 3)}"],
-                         [r"$\omega_{\rm{c}}$"+f" = {round(omega_c, 3)}"],
-                         [r"$\omega_{\rm{ps}}$"+f" = {round(omega_ps, 3)}"],
-                         [r"$\omega_{\rm{pn}}$"+f" = {round(omega_pn, 3)}"],
-                         [r"$\epsilon_{\infty}$"+f" = {round(epsilon_inf, 3)}"],]
+    tble = axs[0].table([[""],[fr"$\Gamma$ = {gamma:.3}"],
+                         [r"$\omega_{\rm{c}}$"+f" = {omega_c:.3}"],
+                         [r"$\omega_{\rm{ps}}$"+f" = {np.sqrt(omega_ps_sq):.1f}"],
+                         [r"$\omega_{\rm{pn}}$"+f" = {np.sqrt(omega_pn_sq):.1f}"],
+                         [r"$\epsilon_{\infty}$"+f" = {epsilon_inf}"],]
                          ,cellLoc="left", colWidths=[0.3], loc=14, fontsize=0.01, edges="open")
 
     tble[(1, 0)].get_text().set_color('red') if vary["gamma"] else tble[(1, 0)].get_text().set_color('black')
@@ -257,13 +242,33 @@ def plotOnce(label, doping, T, B):
     fullpath = os.path.relpath(__file__)
     dirname, fname = os.path.split(fullpath)
     project_root = dirname + "/../../"
-    datapath = project_root+"user_plots/post"
-
+    datapath = project_root+f"user_plots/{folder}"
     figurename = f"{datapath}/fitting_Drude_{label}_{B}T.pdf"
 
     fig.savefig(figurename, bbox_inches="tight")
     plt.close()
 
-for (label, doping, T) in zip(labels, dopings, temperatures):
-    for B in fields:
-        plotOnce(label, B)
+
+def plot_all_post():
+    labels = ["post35", "post40", "post45", "post50"  ]
+    dopings = [0.16, 0.16, 0.16, 0.16]
+    temperatures = [35, 40, 45, 50]
+    fields = [0, 9, 20, 31]
+    for (label, doping, T) in zip(labels, dopings, temperatures):
+        for B in fields:
+            plotOnce("post", label, doping, T, B)
+
+
+def plot_all_legros():
+    labels = ["UD39K", "OD36K", "OD35K", "OD17K", "OD13K", "NSC"]
+    dopings = [0.131, 0.202, 0.205, 0.244, 0.251, 0.263]
+    temperatures = [35, 25, 20, 20, 15, 15]
+    fields = [0, 4, 9, 14, 20, 31]
+    for (label, doping, T) in zip(labels, dopings, temperatures):
+        for B in fields:
+            plotOnce("legros", label, doping, T, B)
+
+
+if __name__ == "__main__":
+    # plot_all_post()
+    plot_all_legros()
