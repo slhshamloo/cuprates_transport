@@ -17,16 +17,24 @@ vary = {
 }
 
 ## Field and Temperature values to probe
-temperature = [
-    35, 40, 45, 50  
+labels = [
+    "post35", "post40", "post45", "post50"  
 ]
 
-field = [
+temperatures = [
+    35, 40, 45, 50
+]
+
+dopings = [
+    0.16, 0.16, 0.16, 0.16
+]
+
+fields = [
     0, 9, 20, 31
 ]
 
 
-def plotOnce(T,B):
+def plotOnce(label, doping, T, B):
     ## Load Data /////////////////////////////////////////////////////////////////////
     fullpath = os.path.relpath(__file__)
     dirname, fname = os.path.split(fullpath)
@@ -37,7 +45,7 @@ def plotOnce(T,B):
     x_data, y_data = [], []
     i = 1
     for j in ["r", "l"]:
-        filename = f"post{T}_sigma{i}{j}_{B}T.csv"
+        filename = f"{label}_sigma{i}{j}_{B}T.csv"
         data = np.loadtxt(f"{datapath}/{filename}", 
                           dtype="float", 
                           comments="#", 
@@ -53,7 +61,7 @@ def plotOnce(T,B):
     x_data, y_data = [], []
     i = 2
     for j in ["r", "l"]:
-        filename = f"post{T}_sigma{i}{j}_{B}T.csv"
+        filename = f"{label}_sigma{i}{j}_{B}T.csv"
         data = np.loadtxt(f"{datapath}/{filename}", 
                           dtype="float", 
                           comments="#", 
@@ -107,7 +115,7 @@ def plotOnce(T,B):
     epsilon_inf= out.params["epsilon_inf"].value # 
 
     fullpath = os.path.relpath(__file__)
-    dataname = f"{fullpath[0:-3]}__T_{T}_B_{B}.dat"
+    dataname = f"user_data/post/{fullpath[0:-3]}_{label}_{B}T.dat"
 
     with open(dataname, 'w') as sys.stdout:
         report_fit(out)
@@ -151,9 +159,9 @@ def plotOnce(T,B):
     # axes.axhline(y=0, ls ="--", c ="k", linewidth=0.6)
 
     #############################################
-    fig.text(0.17,0.85, "LSCO\n"+r"$p=$0.16", ha="left")
+    fig.text(0.17,0.85, "LSCO\n"+f"$p={doping}$", ha="left")
     fig.text(0.79,0.28, fr"$B=${B} T", ha="right")
-    fig.text(0.79,0.22, fr"$T=${T} K", ha="right")
+    fig.text(0.79,0.22, fr"$T=${label[-2:]} K", ha="right")
     #############################################
     tble = axs[0].table([[""],[fr"$\Gamma$ = {round(gamma, 3)}"],
                          [r"$\omega_{\rm{c}}$"+f" = {round(omega_c, 3)}"],
@@ -249,13 +257,13 @@ def plotOnce(T,B):
     fullpath = os.path.relpath(__file__)
     dirname, fname = os.path.split(fullpath)
     project_root = dirname + "/../../"
-    datapath = project_root+"plots/post"
+    datapath = project_root+"user_plots/post"
 
-    figurename = f"{datapath}/fitting_Drude_T_{T}_B_{B}.pdf"
+    figurename = f"{datapath}/fitting_Drude_{label}_{B}T.pdf"
 
-    fig.savefig(figurename, bbox_inches = "tight")
+    fig.savefig(figurename, bbox_inches="tight")
     plt.close()
 
-for B in field:
-    for T in temperature:
-        plotOnce(T,B)
+for (label, doping, T) in zip(labels, dopings, temperatures):
+    for B in fields:
+        plotOnce(label, B)
