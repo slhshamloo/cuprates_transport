@@ -1,6 +1,7 @@
 import pickle
 import numpy as np
 from lmfit import minimize, Parameters
+from tqdm import tqdm
 from scipy.constants import epsilon_0
 
 epsilon_0 = epsilon_0 * 1e7
@@ -30,8 +31,8 @@ def load_data(paper, sample, mag_field):
 
 ## Fit ///////////////////////////////////////////////////////////////////////
 def fitting_model(omega, omega_pn_sq, omega_ps_sq, omega_c, gamma):
-    return 1j * epsilon_0 * (omega_pn_sq / (omega - omega_c + 1j * gamma)
-                             + omega_ps_sq / omega)
+    return 2j * np.pi * epsilon_0 * (
+        omega_pn_sq / (omega - omega_c + 1j * gamma) + omega_ps_sq / omega)
 
 
 def compute_diff(pars, omega, data):
@@ -43,10 +44,10 @@ def compute_diff(pars, omega, data):
 
 def generate_pars():
     pars = Parameters()
-    pars.add("omega_pn_sq", value=1e5, min=0)
-    pars.add("omega_ps_sq", value=1e3, min=0)
-    pars.add("omega_c", value=0.1, min=0)
-    pars.add("gamma", value=1, min=0)
+    pars.add("omega_pn_sq", value=4e4, min=1e4, max=1e5)
+    pars.add("omega_ps_sq", value=1e3, min=0, max=1e5)
+    pars.add("omega_c", value=0.1, min=0, max=1)
+    pars.add("gamma", value=5, min=0.9, max=10)
     return pars
 
 
@@ -57,7 +58,7 @@ def fit_data(pars, omega, sigma):
 ## Batch fitting ////////////////////////////////////////////////////////////////
 def generate_fits(paper, sample, fields):
     fits = {}
-    for field in fields:
+    for field in tqdm(fields):
         omega, sigma = load_data(paper, sample, field)
         pars = generate_pars()
         out = fit_data(pars, omega, sigma)
@@ -67,7 +68,7 @@ def generate_fits(paper, sample, fields):
 
 def generate_post_fits():
     fit_sets = {}
-    for temperature in range(35, 55, 5):
+    for temperature in tqdm(range(35, 55, 5)):
         fit_sets[f"post_{temperature}K"] = generate_fits(
             "post", f"post{temperature}", [0, 9, 20, 31])
     return fit_sets
@@ -75,7 +76,7 @@ def generate_post_fits():
 
 def generate_legros_fits():
     fit_sets = {}
-    for sample in ["NSC", "OD13K", "OD17K", "OD35K", "OD36K", "UD39K"]:
+    for sample in tqdm(["NSC", "OD13K", "OD17K", "OD35K", "OD36K", "UD39K"]):
         fit_sets[f"legros_{sample}"] = generate_fits(
             "legros", sample, [0, 4, 9, 14, 20, 31])
     return fit_sets
