@@ -55,7 +55,7 @@ def get_free_params():
         "b": 3.75,
         "c": 13.2,
         "energy_scale": 160,
-        "band_params":{"mu": -0.5, "t": 1},
+        "band_params":{"mu": -0.8243, "t": 1},
         "tight_binding": "mu + t*((kx)**2+(ky)**2)",
         "res_xy": 20,
         "res_z": 5,
