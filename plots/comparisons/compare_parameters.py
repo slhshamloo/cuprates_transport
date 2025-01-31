@@ -340,4 +340,4 @@ if __name__ == "__main__":
     #plot_free_iso_vs_aniso_vary_B()
     #plot_free_iso_vs_aniso_vary_gamma_0()
     #plot_lsco_iso_vs_aniso_vary_B()
-    #plot_lsco_iso_vs_aniso_vary_gamma_0()
+    plot_lsco_iso_vs_aniso_vary_gamma_0()
