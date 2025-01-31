@@ -222,7 +222,7 @@ class BandStructure:
     def dispersion_grid(self, res_x=500, res_y=500, res_z=500):
         kx_a = np.linspace(-pi / self.a, pi / self.a, res_x)
         ky_a = np.linspace(-pi / self.b, pi / self.b, res_y)
-        kz_a = np.linspace(-pi / self.c, pi / self.c, res_z)
+        kz_a = np.linspace(-2*pi / self.c, 2*pi / self.c, res_z)
         # kz_a = np.linspace(-pi / self.c, pi / self.c, res_z)
         kxx, kyy, kzz = np.meshgrid(kx_a, ky_a, kz_a, indexing='ij')
         e_3D = self.e_3D_func(kxx, kyy, kzz)
