@@ -67,17 +67,17 @@ for T, resOverB in results.items():
   GVals = []
   for b in resOverB:
     bVals.append(b)
-    GVals.append(resOverB[b].params['gamma'])
+    GVals.append(resOverB[b].params['gamma'].value)
 
   bVals = np.array(bVals)
   GVals = np.array(GVals)
   
-  plots[T] = axis.plot(bVals, GVals/(2*np.pi), label=fr"$T$ = {T} K")
+  plots[T] = axis.plot(bVals, GVals, label=fr"$T$ = {T} K")
   plt.setp(plots[T], ls ="", lw = 2, marker = "o", ms=10, mew= 2)
 
 ######################################################
 
-fig.text(0.2,0.28, f"From Post et al. data\nFit extraction", ha = "left")
+# fig.text(0.2,0.28, f"From Post et al. data\nFit extraction", ha = "left")
 
 
 ######################################################
@@ -122,6 +122,13 @@ path = os.path.relpath(__file__)
 ex_filename = f"{path[:-3]}.pdf"
 
 plt.show()
-fig.savefig(ex_filename, bbox_inches = "tight")
+fullpath = os.path.relpath(__file__)
+dirname, fname = os.path.split(fullpath)
+project_root = dirname + "/../../"
+ex_filename = f"{fname[:-3]}.pdf"
+imgPath = project_root+"user_plots/post/"+ex_filename
+
+plt.show()
+fig.savefig(imgPath, bbox_inches = "tight")
 print(f"Saved {ex_filename}")
 plt.close()

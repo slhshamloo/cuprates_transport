@@ -70,17 +70,17 @@ for T, resOverB in results.items():
   omegacVals = []
   for b in resOverB:
     bVals.append(b)
-    omegacVals.append(resOverB[b].params['omega_c'])
+    omegacVals.append(resOverB[b].params['omega_c'].value)
 
   bVals = np.array(bVals)
-  omegacVals = np.array(omegacVals)/(2*np.pi)
+  omegacVals = np.array(omegacVals)
 
   plots[T] = axis.plot(bVals, omegacVals, label=f"T = {T} K")
   plt.setp(plots[T], ls ="", lw = 2, marker = "o", ms=10, mew= 2)
 
 ######################################################
 
-fig.text(0.2,0.8, f"From Post et al. data\nFit extraction", ha = "left")
+# fig.text(0.2,0.8, f"From Post et al. data\nFit extraction", ha = "left")
 
 
 ######################################################
@@ -120,10 +120,15 @@ axis.yaxis.set_major_locator(MultipleLocator(ytics))
 #plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 ######################################################
 
-path = os.path.relpath(__file__)
-ex_filename = f"{path[:-3]}.pdf"
+plt.show()
+
+fullpath = os.path.relpath(__file__)
+dirname, fname = os.path.split(fullpath)
+project_root = dirname + "/../../"
+ex_filename = f"{fname[:-3]}.pdf"
+imgPath = project_root+"user_plots/post/"+ex_filename
 
 plt.show()
-fig.savefig(ex_filename, bbox_inches = "tight")
+fig.savefig(imgPath, bbox_inches = "tight")
 print(f"Saved {ex_filename}")
 plt.close()

@@ -7,6 +7,7 @@ from matplotlib.ticker import AutoMinorLocator, MultipleLocator, FormatStrFormat
 import os
 import pickle
 from matplotlib.lines import Line2D
+import lmfit
 #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 ## Plotting >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -72,21 +73,21 @@ for T, resOverB in results.items():
   omegapSVals = []
   for b in resOverB:
     bVals.append(b)
-    omegapNVals.append(resOverB[b].params['omega_pn'])
-    omegapSVals.append(resOverB[b].params['omega_ps'])
+    omegapNVals.append(resOverB[b].params['omega_pn_sq'].value)
+    omegapSVals.append(resOverB[b].params['omega_ps_sq'].value)
 
   bVals = np.array(bVals)
   omegapSVals = np.array(omegapSVals)
   omegapNVals = np.array(omegapNVals)
 
-  plots[T] = axis.plot(bVals, omegapNVals**2)
-  plotsSuper[T] = axis.plot(bVals, omegapSVals**2, c=plots[T][0].get_color())
+  plots[T] = axis.plot(bVals, omegapNVals)
+  plotsSuper[T] = axis.plot(bVals, omegapSVals, c=plots[T][0].get_color())
   plt.setp(plots[T], ls =":", lw = 2, marker = "o", ms=10, mew= 2)
   plt.setp(plotsSuper[T], ls =":", lw = 2, marker = "*", ms=10, mew= 2)
 
 ######################################################
 
-fig.text(0.2,0.28, f"From Post et al. data\nFit extraction", ha = "left")
+# fig.text(0.2,0.28, f"From Post et al. data\nFit extraction", ha = "left")
 
 
 ######################################################
@@ -130,10 +131,13 @@ majorFormatter = FormatStrFormatter('%g') # put the format of the number of tick
 plt.ticklabel_format(style='sci', axis='y', scilimits=(3,3))
 ######################################################
 
-path = os.path.relpath(__file__)
-ex_filename = f"{path[:-3]}.pdf"
+fullpath = os.path.relpath(__file__)
+dirname, fname = os.path.split(fullpath)
+project_root = dirname + "/../../"
+ex_filename = f"{fname[:-3]}.pdf"
+imgPath = project_root+"user_plots/post/"+ex_filename
 
 plt.show()
-fig.savefig(ex_filename, bbox_inches = "tight")
+fig.savefig(imgPath, bbox_inches = "tight")
 print(f"Saved {ex_filename}")
 plt.close()
