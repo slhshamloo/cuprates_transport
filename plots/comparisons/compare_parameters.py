@@ -332,12 +332,15 @@ def plot_lsco_iso_vs_aniso_vary_gamma_0():
 
 if __name__ == "__main__":
     # calculate_free()
-    # calculate_lsco()
+    calculate_lsco()
     # plot_free_vary_gamma_k()
     # plot_free_vary_power()
     # plot_lsco_vary_gamma_k()
     # plot_lsco_vary_power()
     # plot_free_iso_vs_aniso_vary_B()
     # plot_free_iso_vs_aniso_vary_gamma_0()
-    # plot_lsco_iso_vs_aniso_vary_B()
+    # for gamma_k in [2, 4, 6, 8]:
+    #     plot_lsco_iso_vs_aniso_vary_B(gamma_k=gamma_k)
+    for nu in [2, 6, 12, 18]:
+        plot_lsco_iso_vs_aniso_vary_B(gamma_k=5, nu=nu)
     # plot_lsco_iso_vs_aniso_vary_gamma_0()
