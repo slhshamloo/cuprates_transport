@@ -8,23 +8,19 @@ epsilon_0 = epsilon_0 * 1e7
 
 
 def load_data(paper, sample, mag_field):
-    omega_l, sigma1l = np.loadtxt(
-        f"data/{paper}/{sample}_sigma1l_{mag_field}T.csv",
-        skiprows=1, delimiter=',', unpack=True)
-    omega_r, sigma1r = np.loadtxt(
-        f"data/{paper}/{sample}_sigma1r_{mag_field}T.csv",
-        skiprows=1, delimiter=',', unpack=True)
-    omega_l_2, sigma2l = np.loadtxt(
-        f"data/{paper}/{sample}_sigma2l_{mag_field}T.csv",
-        skiprows=1, delimiter=',', unpack=True)
-    omega_r_2, sigma2r = np.loadtxt(
-        f"data/{paper}/{sample}_sigma2r_{mag_field}T.csv",
-        skiprows=1, delimiter=',', unpack=True)
-    sigma2l = np.interp(omega_l, omega_l_2, sigma2l)
-    sigma2r = np.interp(omega_r, omega_r_2, sigma2r)
-    omega = np.concatenate((omega_l, omega_r))
-    sigma1 = np.concatenate((sigma1l, sigma1r))
-    sigma2 = np.concatenate((sigma2l, sigma2r))
+    omega_dict = {}
+    sigma_dict = {}
+    for real_imag in ('1', '2'):
+        for side in ('l', 'r'):
+            omega_dict[real_imag+side], sigma_dict[real_imag+side] = (
+                np.loadtxt(f"data/{paper}/{sample}_sigma"
+                           f"{real_imag}{side}_{mag_field}T.csv",
+                           skiprows=1, delimiter=',', unpack=True))
+    omega = np.concatenate((omega_dict["1l"], omega_dict["1r"]))
+    sigma1 = np.concatenate((sigma_dict["1l"], sigma_dict["1r"]))
+    sigma2 = np.concatenate((
+        np.interp(omega_dict["1l"], omega_dict["2l"], sigma_dict["2l"]),
+        np.interp(omega_dict["1r"], omega_dict["2r"], sigma_dict["2r"])))
     sigma = sigma1 + 1j * sigma2
     return omega, sigma
 
