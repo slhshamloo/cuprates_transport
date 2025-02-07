@@ -28,13 +28,13 @@ def load_data(paper, sample, field):
 
 def get_init_params():
     return {
-        "band_name": "Nd-LSCO",
-        "a": 3.75,
-        "b": 3.75,
-        "c": 13.2,
-        "energy_scale": 190,
-        "band_params":{"mu":-0.82439881, "t":1, "tp":-0.13642799,
-                       "tpp":0.06816836, "tz":0.06512192},
+        "band_name": "LSCO",
+        "a": 3.76,
+        "b": 3.76,
+        "c": 13.22,
+        "energy_scale": 160,
+        "band_params":{"mu":-0.758, "t": 1, "tp":-0.12,
+                       "tpp":0.06, "tz": 0.07},
         "res_xy": 50,
         "res_z": 5,
         "N_time": 1000,
