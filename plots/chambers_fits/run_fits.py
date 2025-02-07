@@ -3,8 +3,10 @@ import numpy as np
 import lmfit
 from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor
-from cuprates_transport.bandstructure import BandStructure
-from cuprates_transport.conductivity import Conductivity
+
+import sys
+sys.path.append(os.path.dirname(os.path.relpath(__file__)))
+from chambers_fit_omega import run_fit
 
 
 def load_data(paper, sample, field):
@@ -64,49 +66,6 @@ ranges_dict = {
     # "gamma_dos_max": [0.1, 200],
     # "factor_arcs" : [1, 300],
 }
-
-
-def get_lmfit_pars(params, ranges):
-    lmfit_pars = lmfit.Parameters()
-    for value_label in ranges:
-        if value_label in params:
-            value = params[value_label]
-        else:
-            value = params["band_params"][value_label]
-        lmfit_pars.add(value_label, value=value, min=ranges[value_label][0],
-                       max=ranges[value_label][1])
-    return lmfit_pars
-
-
-def chambers_residual(lmfit_pars, omegas, sigmas, params, ranges):
-    func_params = params.copy()
-    for value_label in ranges:
-        if value_label in func_params:
-            func_params[value_label] = lmfit_pars[value_label].value
-        else:
-            func_params["band_params"][value_label] = lmfit_pars[value_label].value
-    band_obj = BandStructure(**func_params)
-    band_obj.runBandStructure()
-    cond_obj = Conductivity(band_obj, **func_params)
-    cond_obj.runTransport()
-
-    sigma_fit = np.empty_like(sigmas)
-    for (i, omega) in enumerate(omegas):
-        setattr(cond_obj, "omega", omega)
-        cond_obj.chambers_func()
-        sigma_fit[i] = (cond_obj.sigma[0, 0] + 1j * cond_obj.sigma[0, 1]
-                        ).conjugate() * 1e-5
-
-    return (sigmas - sigma_fit).view(float)
-
-
-def run_fit(paper, sample, field):
-    params = get_init_params()
-    params["Bamp"] = field
-    pars = get_lmfit_pars(params, ranges_dict)
-    omega, sigma = load_data(paper, sample, field)
-    return lmfit.minimize(chambers_residual, pars,
-                          args=(omega, sigma, params, ranges_dict))
 
 
 def save_fit(fit_result, sample, field):
@@ -188,6 +147,13 @@ def export_fits_to_csv(samples, fields):
                                 f"{parameter_errors[key][i]}\n")
 
 
+def run_single_fit(paper, sample, field):
+    omega, sigma = load_data(paper, sample, field)
+    init_params = get_init_params()
+    init_params["field"] = field
+    return run_fit(omega, sigma, init_params, ranges_dict)
+
+
 def run_fits(paper, samples, fields):
     with ProcessPoolExecutor() as executor:
         papers = [paper] * len(samples) * len(fields)
@@ -195,8 +161,9 @@ def run_fits(paper, samples, fields):
         samples = [sample for sublist in samples for sample in sublist]
         fields = [[field] for field in fields] * len(samples)
         fields = [field for sublist in fields for field in sublist]
-        results = list(tqdm(executor.map(run_fit, papers, samples, fields),
-                            total=len(samples)))
+        results = list(tqdm(
+            executor.map(run_single_fit, papers, samples, fields),
+            total=len(samples)))
         for i, fit_result in enumerate(results):
             save_fit(fit_result, samples[i], fields[i])
 
