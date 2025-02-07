@@ -5,6 +5,7 @@ from matplotlib.ticker import AutoMinorLocator, MultipleLocator, FormatStrFormat
 import os
 import sys
 from lmfit import minimize, Parameters, report_fit
+import pickle
 ##>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 ## Free parameters to vary
@@ -63,7 +64,7 @@ def plotOnce(folder, label, doping, T, B):
 
         All parameters must be given in THz and the result is in (mOhm.cm)^-1"""
         e0 = 8.854e-12
-        return 1j * 1e7 * e0 * (omega_pn_sq /(omega - omega_c + 1j*gamma)
+        return 2j * np.pi * 1e7 * e0 * (omega_pn_sq /(omega - omega_c + 1j*gamma)
                                 + omega_ps_sq / omega - omega * (epsilon_inf - 1))
 
 
@@ -83,7 +84,13 @@ def plotOnce(folder, label, doping, T, B):
     omega_c_zero = 1e-12*e*B/(2*me) # Cyclotron frequency in rad.THz
 
     pars = Parameters()
-    pars.add("gamma", value = 1, vary=vary["gamma"], min=0)
+    #pars.add("gamma", value = 1, vary=vary["gamma"], min=0)
+    #pars.add("omega_pn_sq", value = 1e5, vary=vary["omega_pn"], min=0)
+    #pars.add("omega_ps_sq", value = 1e3, vary=vary["omega_ps"], min=0)
+    #pars.add("omega_c", value = 0.1,  vary=vary["omega_c"], min=0)
+    #pars.add("epsilon_inf", value = 1,  vary=vary["epsilon_inf"])
+
+    pars.add("gamma", value = 5, vary=vary["gamma"], min=0.5)
     pars.add("omega_pn_sq", value = 1e5, vary=vary["omega_pn"], min=0)
     pars.add("omega_ps_sq", value = 1e3, vary=vary["omega_ps"], min=0)
     pars.add("omega_c", value = 0.1,  vary=vary["omega_c"], min=0)
@@ -92,10 +99,10 @@ def plotOnce(folder, label, doping, T, B):
 
     out = minimize(compute_diff, pars, args=(x_data_r, x_data_i, y_data_r, y_data_i))
 
-    gamma = out.params["gamma"].value # Gamma in rad.THz
-    omega_pn_sq = out.params["omega_pn_sq"].value # OmegaPN in rad**2.THz**2
+    gamma = out.params["gamma"].value # Gamma in THz
+    omega_pn_sq = out.params["omega_pn_sq"].value # OmegaPN in THz**2
     omega_ps_sq = out.params["omega_ps_sq"].value
-    omega_c = out.params["omega_c"].value # Omegac in rad.THz
+    omega_c = out.params["omega_c"].value # Omegac in THz
     epsilon_inf= out.params["epsilon_inf"].value # 
 
     dataname = (project_root + f"user_data/{folder}/"
@@ -148,10 +155,10 @@ def plotOnce(folder, label, doping, T, B):
     fig.text(0.79,0.28, fr"$B=${B} T", ha="right")
     fig.text(0.79,0.22, fr"$T=${label[-2:]} K", ha="right")
     #############################################
-    tble = axs[0].table([[""],[fr"$\Gamma$ = {gamma:.3}"],
-                         [r"$\omega_{\rm{c}}$"+f" = {omega_c:.3}"],
-                         [r"$\omega_{\rm{ps}}$"+f" = {np.sqrt(omega_ps_sq):.1f}"],
-                         [r"$\omega_{\rm{pn}}$"+f" = {np.sqrt(omega_pn_sq):.1f}"],
+    tble = axs[0].table([[""],[fr"$\Gamma$ = {2*np.pi*gamma:.3}"],
+                         [r"$\omega_{\rm{c}}$"+f" = {2*np.pi*omega_c:.3}"],
+                         [r"$\omega_{\rm{ps}}$"+f" = {2*np.pi*np.sqrt(omega_ps_sq):.1f}"],
+                         [r"$\omega_{\rm{pn}}$"+f" = {2*np.pi*np.sqrt(omega_pn_sq):.1f}"],
                          [r"$\epsilon_{\infty}$"+f" = {epsilon_inf}"],]
                          ,cellLoc="left", colWidths=[0.3], loc=14, fontsize=0.01, edges="open")
 
@@ -237,7 +244,7 @@ def plotOnce(folder, label, doping, T, B):
     ######################################################
 
 
-    plt.show()
+    #plt.show()
 
     fullpath = os.path.relpath(__file__)
     dirname, fname = os.path.split(fullpath)
@@ -248,15 +255,33 @@ def plotOnce(folder, label, doping, T, B):
     fig.savefig(figurename, bbox_inches="tight")
     plt.close()
 
+    return out
+
 
 def plot_all_post():
     labels = ["post35", "post40", "post45", "post50"  ]
     dopings = [0.16, 0.16, 0.16, 0.16]
     temperatures = [35, 40, 45, 50]
     fields = [0, 9, 20, 31]
+
+    # Run the case and create the results
+    results = dict()
     for (label, doping, T) in zip(labels, dopings, temperatures):
+        if not T in results:
+            results[T] = dict()
         for B in fields:
-            plotOnce("post", label, doping, T, B)
+            out = plotOnce("post", label, doping, T, B)
+            results[T][B] = out
+    
+    ## Save the fitting result
+    fullpath = os.path.relpath(__file__)
+    dirname, fname = os.path.split(fullpath)
+    project_root = dirname + "/../../"
+    datapath = project_root+"data_processing/post"
+
+    with open(f'{datapath}/all_fits.pickle', 'wb') as f:
+        pickle.dump(results, f)
+
 
 
 def plot_all_legros():
@@ -270,5 +295,5 @@ def plot_all_legros():
 
 
 if __name__ == "__main__":
-    # plot_all_post()
-    plot_all_legros()
+    plot_all_post()
+    #plot_all_legros()
