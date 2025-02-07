@@ -16,15 +16,24 @@ def get_lmfit_pars(params, ranges):
     return lmfit_pars
 
 
-def chambers_residual(lmfit_pars, omegas, sigmas, params, ranges):
+def chambers_residual(lmfit_pars, omegas, sigmas,
+                      band_obj, params, ranges):
     func_params = params.copy()
+    rerun_band = False
     for value_label in ranges:
-        if value_label in func_params:
+        if value_label == "energy_scale":
+            func_params[value_label] = lmfit_pars[value_label].value
+            band_obj.energy_scale = lmfit_pars[value_label].value
+            rerun_band = True
+        elif value_label in func_params:
             func_params[value_label] = lmfit_pars[value_label].value
         else:
-            func_params["band_params"][value_label] = lmfit_pars[value_label].value
-    band_obj = BandStructure(**func_params)
-    band_obj.runBandStructure()
+            func_params["band_params"][value_label] = (
+                lmfit_pars[value_label].value)
+            band_obj.band_params[value_label] = lmfit_pars[value_label].value
+            rerun_band = True
+    if rerun_band:
+        band_obj.runBandStructure()
     cond_obj = Conductivity(band_obj, **func_params)
     cond_obj.runTransport()
 
@@ -39,6 +48,9 @@ def chambers_residual(lmfit_pars, omegas, sigmas, params, ranges):
 
 
 def run_fit(omega, sigma, init_params, ranges_dict):
+    band_obj = BandStructure(**init_params)
+    band_obj.runBandStructure()
     pars = get_lmfit_pars(init_params, ranges_dict)
-    return lmfit.minimize(chambers_residual, pars,
-                          args=(omega, sigma, init_params, ranges_dict))
+    return lmfit.minimize(
+        chambers_residual, pars,
+        args=(omega, sigma, band_obj, init_params, ranges_dict))
