@@ -1,5 +1,6 @@
 import lmfit
 import numpy as np
+from copy import deepcopy
 from cuprates_transport.bandstructure import BandStructure
 from cuprates_transport.conductivity import Conductivity
 
@@ -19,6 +20,7 @@ def get_lmfit_pars(params, ranges):
 def chambers_residual(lmfit_pars, omegas, sigmas,
                       band_obj, params, ranges):
     func_params = params.copy()
+    band_obj = deepcopy(band_obj)
     rerun_band = False
     for value_label in ranges:
         if value_label == "energy_scale":
