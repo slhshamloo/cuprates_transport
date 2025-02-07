@@ -32,7 +32,7 @@ def chambers_residual(lmfit_pars, omegas, sigmas,
         else:
             func_params["band_params"][value_label] = (
                 lmfit_pars[value_label].value)
-            band_obj.band_params[value_label] = lmfit_pars[value_label].value
+            band_obj[value_label] = lmfit_pars[value_label].value
             rerun_band = True
     if rerun_band:
         band_obj.runBandStructure()
