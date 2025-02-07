@@ -34,14 +34,14 @@ def get_lsco_params():
         "a": 3.75,
         "b": 3.75,
         "c": 13.2,
-        "energy_scale": 160,
+        "energy_scale": 50,
         "band_params":{"mu": -0.8243, "t": 1, "tp": -0.1364,
                        "tpp": 0.0682, "tz": 0.0651},
         "res_xy": 20,
         "res_z": 5,
         "N_time": 1000,
         "Bamp": 10.0,
-        "gamma_0": 10.0,
+        "gamma_0": 5.0,
         "gamma_k": 20.0,
         "power": 6,
         "omega": 1.0,
@@ -120,7 +120,8 @@ def calculate_free(
 
 def calculate_lsco(
         B_vals=[0, 50, 100, 150, 200], gamma_0_vals=[10, 15, 20, 25],
-        gamma_k_vals=[0, 10, 25, 50, 100], nu_vals=[2, 6, 12, 18]):
+        gamma_k_vals=[0, 10, 25, 50, 100], nu_vals=[2, 6, 12, 18],
+        gamma_k_default=20, nu_default=6):
     params = get_lsco_params()
     bandObject = BandStructure(**params)
     bandObject.runBandStructure()
@@ -130,23 +131,23 @@ def calculate_lsco(
     # vary_value("NdLSCO", "power", "power", nu_vals,
     #            np.linspace(0, 20, 100), params, bandObject)
 
-    # params["gamma_k"] = 0
-    # vary_value("NdLSCO_iso", "Bamp", "B", B_vals,
-    #            np.linspace(-20, 20, 50), params, bandObject)
+    params["gamma_k"] = 0
+    vary_value("NdLSCO_iso", "Bamp", "B", B_vals,
+               np.linspace(-20, 20, 50), params, bandObject)
     # vary_value("NdLSCO_iso", "gamma_0", "gamma_0", [10, 15, 20, 25],
     #            np.linspace(0, 20, 100), params, bandObject)
 
-    # for gamma_k in [2, 4, 6, 8]:
-    #     params["gamma_k"] = gamma_k
-    #     vary_value("NdLSCO_aniso", "Bamp", "B", B_vals,
-    #                 np.linspace(-20, 20, 50), params, bandObject,
-    #                 f"_gamma_k_{gamma_k}_nu_6")
-    params["gamma_k"] = 20
-    for nu in nu_vals:
-        params["power"] = nu
+    for gamma_k in gamma_k_vals:
+        params["gamma_k"] = gamma_k
         vary_value("NdLSCO_aniso", "Bamp", "B", B_vals,
                     np.linspace(-20, 20, 50), params, bandObject,
-                    f"_gamma_k_20_nu_{nu}")
+                    f"_gamma_k_{gamma_k}_nu_{nu_default}")
+    # params["gamma_k"] = gamma_k_default
+    # for nu in nu_vals:
+    #     params["power"] = nu
+    #     vary_value("NdLSCO_aniso", "Bamp", "B", B_vals,
+    #                 np.linspace(-20, 20, 50), params, bandObject,
+    #                 f"_gamma_k_{gamma_k_default}_nu_{nu}")
 
     # vary_value("NdLSCO_aniso", "gamma_0", "gamma_0", gamma_0_vals,
     #            np.linspace(0, 20, 100), params, bandObject)
@@ -349,7 +350,7 @@ def plot_lsco_iso_vs_aniso_vary_gamma_0(gamma_0_vals=[10, 15, 20, 25]):
 
 if __name__ == "__main__":
     # calculate_free()
-    calculate_lsco()
+    calculate_lsco(gamma_k_vals=[20], B_vals=[0, 4, 9, 14, 20, 31])
     # plot_free_vary_gamma_k()
     # plot_free_vary_power()
     # plot_lsco_vary_gamma_k()
@@ -358,6 +359,7 @@ if __name__ == "__main__":
     # plot_free_iso_vs_aniso_vary_gamma_0()
     # for gamma_k in [2, 4, 6, 8]:
     #     plot_lsco_iso_vs_aniso_vary_B(gamma_k=gamma_k)
-    for nu in [2, 6, 12, 18]:
-        plot_lsco_iso_vs_aniso_vary_B(gamma_k=5, nu=nu)
+    # for nu in [2, 6, 12, 18]:
+    #     plot_lsco_iso_vs_aniso_vary_B(gamma_k=5, nu=nu)
+    plot_lsco_iso_vs_aniso_vary_B(gamma_k=20, B_vals=[0, 4, 9, 14, 20, 31])
     # plot_lsco_iso_vs_aniso_vary_gamma_0()

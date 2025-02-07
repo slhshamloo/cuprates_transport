@@ -15,6 +15,8 @@ doc/readme_units_conversion_ADMR.pdf
 data/**/*.dat
 data/**/*.csv
 plots/**/*.pdf
+plots/**/*.csv
+plots/**/*.dat
 
 data_processing/**/*.dat
 data_processing/**/*.pickle
