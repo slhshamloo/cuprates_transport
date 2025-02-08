@@ -57,9 +57,9 @@ def get_init_params():
         "res_z": 5,
         "N_time": 1000,
         "Bamp": 45,
-        "gamma_0": 6, # 12.595,
-        "gamma_k": 600, # 63.823,
-        "power": 3,
+        "gamma_0": 2.5, # 12.595,
+        "gamma_k": 10000.0, # 63.823,
+        "power": 5.0,
         # "gamma_dos_max": 50,
         "march_square": True
     }
@@ -86,12 +86,13 @@ def load_fit(sample, field):
     return parameter_values, parameter_errors
 
 
-def generate_chambers_fit(sample, field, omegas,
+def generate_chambers_fit(sample, field, omegas, bypass_fit=False,
                           init_params=get_init_params()):
     parameter_values, _ = load_fit(sample, field)
     params = init_params.copy()
     params["Bamp"] = field
-    params.update(parameter_values)
+    if not bypass_fit:
+        params.update(parameter_values)
     band_obj = BandStructure(**params)
     band_obj.runBandStructure()
     cond_obj = Conductivity(band_obj, **params)
@@ -135,12 +136,15 @@ def generate_figure(figsize=(9.2, 5.6)):
     return fig, axs
 
 
-def plot_chambers_fit(paper, sample, field):
+def plot_chambers_fit(paper, sample, field, bypass_fit=False, save_fig=False):
     fig, axs = generate_figure()
     omega_data, sigma_data = load_data(paper, sample, field)
-    omega_fit, sigma_fit = load_fit_output_data(sample, field)
-    # omega_fit = np.linspace(omega_data.min(), omega_data.max(), 50)
-    # sigma_fit = generate_chambers_fit(sample, field, 2*np.pi*omega_fit)
+    if bypass_fit:
+        omega_fit = np.linspace(omega_data.min(), omega_data.max(), 50)
+        sigma_fit = generate_chambers_fit(sample, field, 2*np.pi*omega_fit,
+                                          bypass_fit=True)
+    else:
+        omega_fit, sigma_fit = load_fit_output_data(sample, field)
 
     axs[0].plot(omega_fit, sigma_fit.real, label="Fit",
                 lw=2, color="black", ls="--")
@@ -158,7 +162,10 @@ def plot_chambers_fit(paper, sample, field):
     axs[1].legend(loc="upper left", frameon=False, fontsize=20)
     axs[0].text(0.05, 0.9, f"{sample}\n{field}T", transform=axs[0].transAxes,
                 ha="left", va="top", fontsize=20)
-    params = load_fit(sample, field)[0]
+    if bypass_fit:
+        params = get_init_params()
+    else:
+        params = load_fit(sample, field)[0]
     axs[1].text(0.9, 0.05,
                 fr"$\Gamma_0 = {params["gamma_0"]:.3}$"
                 + "\n" + fr"$\Gamma_k = {params["gamma_k"]:.3}$"
@@ -167,8 +174,10 @@ def plot_chambers_fit(paper, sample, field):
                 ha="right", va="bottom", fontsize=20)
 
     fig.tight_layout()
-    # plt.savefig(os.path.dirname(os.path.relpath(__file__))
-    #             + f"/figures/Chambers_{sample}_{field}T.pdf")
+    if save_fig:
+        fig.savefig(os.path.dirname(os.path.relpath(__file__))
+                    + f"/figures/Chambers_{sample}_{field}T.pdf",
+                    bbox_inches="tight")
     plt.show()
 
 
@@ -187,6 +196,6 @@ def plot_all_fits():
 
 
 if __name__ == "__main__":
-    output_all_fits()
-    plot_all_fits()
-    # plot_chambers_fit("legros", "OD17K", 0)
+    # output_all_fits()
+    # plot_all_fits()
+    plot_chambers_fit("legros", "OD17K", 14, bypass_fit=True)
