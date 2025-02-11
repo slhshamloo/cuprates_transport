@@ -18,11 +18,11 @@ def load_data(paper, sample, field):
                 np.loadtxt(f"data/{paper}/{sample}_sigma"
                            f"{real_imag}{side}_{field}T.csv",
                            skiprows=1, delimiter=',', unpack=True))
-    omega = np.concatenate((omega_dict["1l"], omega_dict["1r"]))
-    sigma1 = np.concatenate((sigma_dict["1l"], sigma_dict["1r"]))
+    omega = np.concatenate((omega_dict['1l'], omega_dict['1r']))
+    sigma1 = np.concatenate((sigma_dict['1l'], sigma_dict['1r']))
     sigma2 = np.concatenate((
-        np.interp(omega_dict["1l"], omega_dict["2l"], sigma_dict["2l"]),
-        np.interp(omega_dict["1r"], omega_dict["2r"], sigma_dict["2r"])))
+        np.interp(omega_dict['1l'], omega_dict['2l'], sigma_dict['2l']),
+        np.interp(omega_dict['1r'], omega_dict['2r'], sigma_dict['2r'])))
     sigma = sigma1 + 1j * sigma2
     omega *= 2 * np.pi
     return omega, sigma
@@ -41,11 +41,12 @@ def get_init_params():
         "res_z": 5,
         "N_time": 1000,
         "Bamp": 45,
-        "gamma_0": 6, # 12.595,
-        "gamma_k": 600, # 63.823,
-        "power": 3,
+        "gamma_0": 7.5, # 12.595,
+        "gamma_k": 1000, # 63.823,
+        "power": 4.5,
         # "gamma_dos_max": 50,
-        "march_square": True
+        "march_square": True,
+        # "parallel": False
     }
 
 
@@ -60,17 +61,17 @@ ranges_dict = {
     # "tz3": [0.001,0.08],
     # "tz4": [0.001,0.08],
     # "mu": [-0.7,-0.9],
-    "gamma_0": [1,20],
-    "gamma_k": [1, 3000],
-    "power":[1, 20],
+    "gamma_0": [1.0, 20.0],
+    "gamma_k": [1.0, 1e4],
+    "power":[1.0, 20.0],
     # "gamma_dos_max": [0.1, 200],
     # "factor_arcs" : [1, 300],
 }
 
 
-def save_fit(fit_result, sample, field):
+def save_fit(fit_result, sample, field, extra_info=""):
     with open(os.path.dirname(os.path.relpath(__file__))
-              + f"/params/{sample}_{field}T.dat", 'w') as f:
+              + f"/params/{sample}_{field}T{extra_info}.dat", 'w') as f:
         f.write(lmfit.fit_report(fit_result))
 
 
@@ -147,11 +148,11 @@ def export_fits_to_csv(samples, fields):
                                 f"{parameter_errors[key][i]}\n")
 
 
-def run_single_fit(paper, sample, field):
+def run_single_fit(paper, sample, field, ranges=ranges_dict,
+                   init_params=get_init_params()):
     omega, sigma = load_data(paper, sample, field)
-    init_params = get_init_params()
-    init_params["field"] = field
-    return run_fit(omega, sigma, init_params, ranges_dict)
+    init_params['Bamp'] = field
+    return run_fit(omega, sigma, init_params, ranges)
 
 
 def run_fits(paper, samples, fields):
@@ -174,9 +175,10 @@ def main():
     # run_fits("legros", ["NSC", "OD13K", "OD17K", "OD35K", "OD36K", "UD39K"],
     #          [0, 4, 9, 14, 20, 31])
     run_fits("legros", ["OD17K"], [0, 4, 9, 14, 20, 31])
-    export_fits_to_csv(
-        ["NSC", "OD13K", "OD17K", "OD35K", "OD36K", "UD39K",
-         "post35", "post40", "post45", "post50"], [0, 4, 9, 14, 20, 31])
+    # run_fits_single_field("legros", "OD17K", 14)
+    # export_fits_to_csv(
+    #     ["NSC", "OD13K", "OD17K", "OD35K", "OD36K", "UD39K",
+    #      "post35", "post40", "post45", "post50"], [0, 4, 9, 14, 20, 31])
 
 
 if __name__ == "__main__":
