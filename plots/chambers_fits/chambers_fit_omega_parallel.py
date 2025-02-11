@@ -9,7 +9,7 @@ from cuprates_transport.conductivity import Conductivity
 
 def chambers_residual(param_values, param_keys, omegas, sigmas,
                       band_obj, init_params, reduce_error=True):
-    func_params = init_params.copy()
+    func_params = deepcopy(init_params)
     band_obj = deepcopy(band_obj)
     rerun_band = False
     for (i, param_key) in enumerate(param_keys):
@@ -50,16 +50,13 @@ def get_lmfit_pars(params, ranges):
     return lmfit_pars
 
 
-def convert_scipy_result_to_lmfit(result, polish, param_keys, ranges, ndata):
-    chi_sq = np.sum(polish.fun**2)
-    if chi_sq < result.fun * (ndata-len(param_keys)):
-        calc_err = True
-        params = dict(zip(param_keys, polish.x))
-        lmfit_pars = get_lmfit_pars(params, ranges)
-
-        if hasattr(polish, 'jac'):
-            cov_matrix = np.linalg.inv(polish.jac.T@polish.jac) * (
-                np.sum(polish.fun**2) / (len(polish.fun)-len(param_keys)))
+def convert_scipy_result_to_lmfit(
+        result, lmfit_pars, param_keys, ndata, calc_err=True):
+    chi_sq = np.sum(result.fun**2)
+    if calc_err:
+        if hasattr(result, 'jac'):
+            cov_matrix = np.linalg.inv(result.jac.T@result.jac) * (
+                np.sum(result.fun**2) / (ndata-len(param_keys)))
         else:
             cov_matrix = np.zeros((len(param_keys), len(param_keys)))
         for (i, param_key) in enumerate(param_keys):
@@ -70,10 +67,6 @@ def convert_scipy_result_to_lmfit(result, polish, param_keys, ranges, ndata):
                     lmfit_pars[param_key].correl[other_param] = (
                         cov_matrix[i, j] / np.sqrt(
                             cov_matrix[i, i]*cov_matrix[j, j]))
-    else:
-        calc_err = False
-        params = dict(zip(param_keys, result.x))
-        lmfit_pars = get_lmfit_pars(params, ranges)
 
     return MinimizerResult(
         params = lmfit_pars, success=result.success, message=result.message,
@@ -84,23 +77,27 @@ def convert_scipy_result_to_lmfit(result, polish, param_keys, ranges, ndata):
         bic=ndata*np.log(chi_sq/ndata) + len(param_keys)*np.log(ndata))
 
 
-def run_fit(omegas, sigmas, init_params, ranges_dict):
+def run_fit_parallel(omegas, sigmas, init_params, ranges_dict):
     band_obj = BandStructure(**init_params)
     band_obj.runBandStructure()
     param_keys = list(ranges_dict.keys())
+
     bounds = [ranges_dict[key] for key in param_keys]
-    fit_result = differential_evolution(
+    global_fit = differential_evolution(
         chambers_residual, bounds, workers=-1, polish=False,
+        x0=[init_params[key] for key in param_keys],
         args=(param_keys, omegas, sigmas, band_obj, init_params, True))
-    bounds = [
-        [max(0.0, fit_result.x[i] - 0.05 * (ranges_dict[param_keys[i]][1]
-                                            -ranges_dict[param_keys[i]][0]))
-         for i in range(len(param_keys))],
-        [fit_result.x[i] + 0.05 * (ranges_dict[param_keys[i]][1]
-                                   -ranges_dict[param_keys[i]][0])
-         for i in range(len(param_keys))]]
+    params = dict(zip(param_keys, global_fit.x))
+    lmfit_pars = get_lmfit_pars(params, ranges_dict)
+
+    bounds = [[ranges_dict[key][0] for key in param_keys],
+              [ranges_dict[key][1] for key in param_keys]]
     polished_fit = least_squares(
-        chambers_residual, fit_result.x, bounds=bounds,
+        chambers_residual, global_fit.x, bounds=bounds,
         args=(param_keys, omegas, sigmas, band_obj, init_params, False))
-    return convert_scipy_result_to_lmfit(fit_result, polished_fit, param_keys,
-                                         ranges_dict, len(omegas))
+    for i, param_key in enumerate(param_keys):
+        lmfit_pars[param_key].value = polished_fit.x[i]
+    local_fit_lmfit = convert_scipy_result_to_lmfit(
+        polished_fit, lmfit_pars, param_keys, len(omegas), True)
+    
+    return local_fit_lmfit
