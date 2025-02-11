@@ -19,7 +19,7 @@ def get_lmfit_pars(params, ranges):
 
 def chambers_residual(lmfit_pars, omegas, sigmas,
                       band_obj, params, ranges):
-    func_params = params.copy()
+    func_params = deepcopy(params)
     band_obj = deepcopy(band_obj)
     rerun_band = False
     for value_label in ranges:
@@ -39,20 +39,20 @@ def chambers_residual(lmfit_pars, omegas, sigmas,
     cond_obj = Conductivity(band_obj, **func_params)
     cond_obj.runTransport()
 
-    sigma_fit = np.empty_like(sigmas)
+    sigma_fit = np.empty_like(omegas, dtype=complex)
     for (i, omega) in enumerate(omegas):
         setattr(cond_obj, "omega", omega)
         cond_obj.chambers_func()
-        sigma_fit[i] = (cond_obj.sigma[0, 0] + 1j * cond_obj.sigma[0, 1]
+        sigma_fit[i] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]
                         ).conjugate() * 1e-5
 
     return (sigmas - sigma_fit).view(float)
 
 
-def run_fit(omega, sigma, init_params, ranges_dict):
+def run_fit(omegas, sigmas, init_params, ranges_dict):
     band_obj = BandStructure(**init_params)
     band_obj.runBandStructure()
     pars = get_lmfit_pars(init_params, ranges_dict)
     return lmfit.minimize(
         chambers_residual, pars,
-        args=(omega, sigma, band_obj, init_params, ranges_dict))
+        args=(omegas, sigmas, band_obj, init_params, ranges_dict))
