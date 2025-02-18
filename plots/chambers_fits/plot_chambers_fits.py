@@ -1,6 +1,7 @@
 import os, re
 import numpy as np
 import matplotlib as mpl
+from copy import deepcopy
 from matplotlib import pyplot as plt
 from cuprates_transport.bandstructure import BandStructure
 from cuprates_transport.conductivity import Conductivity
@@ -35,11 +36,11 @@ def load_data(paper, sample, field):
                 np.loadtxt(f"data/{paper}/{sample}_sigma"
                            f"{real_imag}{side}_{field}T.csv",
                            skiprows=1, delimiter=',', unpack=True))
-    omega = np.concatenate((omega_dict["1l"], omega_dict["1r"]))
-    sigma1 = np.concatenate((sigma_dict["1l"], sigma_dict["1r"]))
+    omega = np.concatenate((omega_dict['1l'], omega_dict['1r']))
+    sigma1 = np.concatenate((sigma_dict['1l'], sigma_dict['1r']))
     sigma2 = np.concatenate((
-        np.interp(omega_dict["1l"], omega_dict["2l"], sigma_dict["2l"]),
-        np.interp(omega_dict["1r"], omega_dict["2r"], sigma_dict["2r"])))
+        np.interp(omega_dict['1l'], omega_dict['2l'], sigma_dict['2l']),
+        np.interp(omega_dict['1r'], omega_dict['2r'], sigma_dict['2r'])))
     sigma = sigma1 + 1j * sigma2
     return omega, sigma
 
@@ -50,16 +51,16 @@ def get_init_params():
         "a": 3.75,
         "b": 3.75,
         "c": 13.2,
-        "energy_scale": 190,
-        "band_params":{"mu":-0.82439881, "t":1, "tp":-0.13642799,
-                       "tpp":0.06816836, "tz":0.06512192},
-        "res_xy": 50,
+        "energy_scale": 160,
+        "band_params":{"mu":-0.758, "t": 1, "tp":-0.12,
+                       "tpp":0.06, "tz": 0.07},
+        "res_xy": 20,
         "res_z": 5,
         "N_time": 1000,
         "Bamp": 45,
-        "gamma_0": 2.5, # 12.595,
-        "gamma_k": 10000.0, # 63.823,
-        "power": 5.0,
+        "gamma_0": 8.0, # 12.595,
+        "gamma_k": 3e3, # 63.823,
+        "power": 6.2,
         # "gamma_dos_max": 50,
         "march_square": True
     }
@@ -69,7 +70,7 @@ def load_fit(sample, field):
     parameter_values = {}
     parameter_errors = {}
     with open(os.path.dirname(os.path.relpath(__file__))
-              + f"/params/{sample}_{field}T.dat", "r") as f:
+              + f"/params/{sample}_{field}T.dat", 'r') as f:
         while True:
             line = f.readline()
             if not line:
@@ -89,10 +90,14 @@ def load_fit(sample, field):
 def generate_chambers_fit(sample, field, omegas, bypass_fit=False,
                           init_params=get_init_params()):
     parameter_values, _ = load_fit(sample, field)
-    params = init_params.copy()
-    params["Bamp"] = field
+    params = deepcopy(init_params)
+    params['Bamp'] = field
     if not bypass_fit:
-        params.update(parameter_values)
+        for parmeter_key, parameter_value in parameter_values.items():
+            if parmeter_key in params:
+                params[parmeter_key] = parameter_value
+            else:
+                params['band_params'][parmeter_key] = parameter_value
     band_obj = BandStructure(**params)
     band_obj.runBandStructure()
     cond_obj = Conductivity(band_obj, **params)
@@ -101,7 +106,7 @@ def generate_chambers_fit(sample, field, omegas, bypass_fit=False,
     for i, omega in enumerate(omegas):
         setattr(cond_obj, "omega", omega)
         cond_obj.chambers_func()
-        sigma[i] = (cond_obj.sigma[0, 0] + 1j * cond_obj.sigma[0, 1]
+        sigma[i] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]
                     ).conjugate() * 1e-5
     return sigma
 
@@ -147,29 +152,29 @@ def plot_chambers_fit(paper, sample, field, bypass_fit=False, save_fig=False):
         omega_fit, sigma_fit = load_fit_output_data(sample, field)
 
     axs[0].plot(omega_fit, sigma_fit.real, label="Fit",
-                lw=2, color="black", ls="--")
+                lw=2, color='black', ls='--')
     axs[1].plot(omega_fit, sigma_fit.imag, label="Fit",
-                lw=2, color="black", ls="--")
+                lw=2, color='black', ls='--')
     axs[0].plot(omega_data[omega_data<0], sigma_data.real[omega_data<0],
-                label="Data", lw=3, color="red", ls="-")
+                label='Data', lw=3, color='red', ls='-')
     axs[0].plot(omega_data[omega_data>0], sigma_data.real[omega_data>0],
-                lw=3, color="red", ls="-")
+                lw=3, color='red', ls="-")
     axs[1].plot(omega_data[omega_data<0], sigma_data.imag[omega_data<0],
-                label="Data", lw=3, color="red", ls="-")
+                label='Data', lw=3, color='red', ls='-')
     axs[1].plot(omega_data[omega_data>0], sigma_data.imag[omega_data>0],
-                lw=3, color="red", ls="-")
+                lw=3, color='red', ls='-')
 
-    axs[1].legend(loc="upper left", frameon=False, fontsize=20)
+    axs[1].legend(loc='upper left', frameon=False, fontsize=20)
     axs[0].text(0.05, 0.9, f"{sample}\n{field}T", transform=axs[0].transAxes,
-                ha="left", va="top", fontsize=20)
+                ha='left', va='top', fontsize=20)
     if bypass_fit:
         params = get_init_params()
     else:
         params = load_fit(sample, field)[0]
     axs[1].text(0.9, 0.05,
-                fr"$\Gamma_0 = {params["gamma_0"]:.3}$"
-                + "\n" + fr"$\Gamma_k = {params["gamma_k"]:.3}$"
-                + "\n" + fr"$\nu = {params["power"]:.3}$",
+                fr"$\Gamma_0 = {float(params["gamma_0"]):.3}$"
+                + "\n" + fr"$\Gamma_k = {float(params["gamma_k"]):.3}$"
+                + "\n" + fr"$\nu = {float(params["power"]):.3}$",
                 transform=axs[1].transAxes,
                 ha="right", va="bottom", fontsize=20)
 
@@ -177,7 +182,7 @@ def plot_chambers_fit(paper, sample, field, bypass_fit=False, save_fig=False):
     if save_fig:
         fig.savefig(os.path.dirname(os.path.relpath(__file__))
                     + f"/figures/Chambers_{sample}_{field}T.pdf",
-                    bbox_inches="tight")
+                    bbox_inches='tight')
     plt.show()
 
 
@@ -192,10 +197,10 @@ def output_all_fits():
 def plot_all_fits():
     for sample in ["OD17K"]:
         for field in [0, 4, 9, 14, 20, 31]:
-            plot_chambers_fit("legros", sample, field)
+            plot_chambers_fit("legros", sample, field, save_fig=True)
 
 
 if __name__ == "__main__":
-    # output_all_fits()
-    # plot_all_fits()
-    plot_chambers_fit("legros", "OD17K", 14, bypass_fit=True)
+    output_all_fits()
+    plot_all_fits()
+    # plot_chambers_fit("legros", "OD17K", 9, bypass_fit=True)
