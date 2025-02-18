@@ -17,6 +17,7 @@ data/**/*.csv
 plots/**/*.pdf
 plots/**/*.csv
 plots/**/*.dat
+plots/**/*.npy
 
 data_processing/**/*.dat
 data_processing/**/*.pickle
