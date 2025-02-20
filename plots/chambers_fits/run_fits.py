@@ -6,7 +6,7 @@ from concurrent.futures import ProcessPoolExecutor
 
 import sys
 sys.path.append(os.path.dirname(os.path.relpath(__file__)))
-from chambers_fit_omega import run_fit
+from chambers_fit_omega_parallel import run_fit_parallel
 
 
 def load_data(paper, sample, field):
@@ -26,6 +26,27 @@ def load_data(paper, sample, field):
     sigma = sigma1 + 1j * sigma2
     omega *= 2 * np.pi
     return omega, sigma
+
+def sampling_probas(t, sampling='quadratic_symmetric'):
+    if sampling=='uniform':
+        baseSample = np.ones_like(t)
+    elif sampling=='quadratic_symmetric':
+        baseSample = 6*(1-t)*t
+    elif sampling=='quadratic_asymmetric':
+        baseSample = 3*t**2
+
+    return baseSample/np.sum(baseSample)
+
+def downsampling(omega, sigma, minRadius, maxRadius, N):
+    sigma_presampled = sigma[maxRadius>omega & omega>minRadius] 
+    omega = omega[maxRadius>omega & omega>minRadius]
+    t_values = omega/(maxRadius-minRadius)
+
+    idx = np.random.choice(np.arange(len(omega)), size=N, replace=False, p=sampling_probas(t_values))
+    sigma = sigma_presampled[idx]
+    omega = omega[idx]
+
+    return (sigma, omega)
 
 
 def get_init_params():
@@ -151,8 +172,10 @@ def export_fits_to_csv(samples, fields):
 def run_single_fit(paper, sample, field, ranges=ranges_dict,
                    init_params=get_init_params()):
     omega, sigma = load_data(paper, sample, field)
+    omega, sigma = downsampling(omega, sigma, minRadius=0.5, maxRadius=1.4, N=20)
+
     init_params['Bamp'] = field
-    return run_fit(omega, sigma, init_params, ranges)
+    return run_fit_parallel(omega, sigma, init_params, ranges)
 
 
 def run_fits(paper, samples, fields):

@@ -5,6 +5,8 @@ from lmfit.minimizer import MinimizerResult
 from copy import deepcopy
 from cuprates_transport.bandstructure import BandStructure
 from cuprates_transport.conductivity import Conductivity
+import time
+import sys
 
 
 def chambers_residual(param_values, param_keys, omegas, sigmas,
@@ -78,6 +80,20 @@ def convert_scipy_result_to_lmfit(
 
 
 def run_fit_parallel(omegas, sigmas, init_params, ranges_dict):
+    globals()['iteration'] = 0
+    globals()['time_iter'] = time.time()
+    def fn(xk, convergence):
+        globals()['iteration'] += 1
+        text = "Iteration: %d\titer time: %.3f\tconvergence: %.3e" % (globals()['iteration'], (time.time() - globals()['time_iter']), convergence)
+        globals()['time_iter'] = time.time()
+        if (xk != globals()['best_x']).all():
+            globals()['best_x'] = xk
+            # obj_val = fit_object.compute_diff2(xk, verbose=False)
+            sys.stdout.flush()
+            # text += "\tNew best:" + str([round(x, 10) for x in xk]) + "\tchi^2: %.3e" % obj_val
+            text += "\tNew best:" + str([round(x, 10) for x in xk])
+        print(text)
+    
     band_obj = BandStructure(**init_params)
     band_obj.runBandStructure()
     param_keys = list(ranges_dict.keys())
@@ -86,7 +102,7 @@ def run_fit_parallel(omegas, sigmas, init_params, ranges_dict):
     global_fit = differential_evolution(
         chambers_residual, bounds, workers=-1, polish=False,
         x0=[init_params[key] for key in param_keys],
-        args=(param_keys, omegas, sigmas, band_obj, init_params, True))
+        args=(param_keys, omegas, sigmas, band_obj, init_params, True), callback=fn)
     params = dict(zip(param_keys, global_fit.x))
     lmfit_pars = get_lmfit_pars(params, ranges_dict)
 
