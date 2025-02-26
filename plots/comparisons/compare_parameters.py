@@ -34,17 +34,17 @@ def get_lsco_params():
         "a": 3.75,
         "b": 3.75,
         "c": 13.2,
-        "energy_scale": 50,
-        "band_params":{"mu": -0.8243, "t": 1, "tp": -0.1364,
-                       "tpp": 0.0682, "tz": 0.0651},
+        "energy_scale": 80,
+        "band_params":{"mu":-0.758, "t": 1, "tp":-0.12,
+                       "tpp":0.06, "tz": 0.07},
         "res_xy": 20,
         "res_z": 5,
         "N_time": 1000,
-        "Bamp": 10.0,
-        "gamma_0": 5.0,
-        "gamma_k": 20.0,
+        "Bamp": 30,
+        "gamma_0": 10,
+        "gamma_k": 50,
         "power": 6,
-        "omega": 1.0,
+        "march_square": True
     }
 
 
@@ -60,10 +60,10 @@ def get_free_params():
         "res_xy": 20,
         "res_z": 5,
         "N_time": 1000,
-        "Bamp": 0,
-        "gamma_0": 10.0,
-        "gamma_k": 20.0,
-        "power": 6,
+        "Bamp": 30,
+        "gamma_0": 7.0,
+        "gamma_k": 1e3,
+        "power": 4,
         "omega": 1.0,
     }
 
@@ -71,10 +71,11 @@ def get_free_params():
 def compute_sigmas(omegas, params, bandObject):
     sigma_xx = np.empty_like(omegas, dtype=complex)
     sigma_xy = np.empty_like(omegas, dtype=complex)
+    condObject = Conductivity(bandObject, **params)
+    condObject.runTransport()
     for i, omega in tqdm.tqdm(enumerate(omegas)):
-        params["omega"] = omega
-        condObject = Conductivity(bandObject, **params)
-        condObject.runTransport()
+        condObject.omega = omega
+        condObject.chambers_func()
         sigma_xx[i] = condObject.sigma[0,0]
         sigma_xy[i] = condObject.sigma[0,1]
     return sigma_xx, sigma_xy
@@ -94,63 +95,17 @@ def vary_value(band, value_name, value_label, values,
                   + f"{band}_{value_label}_{value}{extra_label}.csv")
 
 
-def calculate_free(
-        B_vals=[0, 500, 1000, 1500, 2000], gamma_0_vals=[10, 15, 20, 25],
-        gamma_k_vals=[0, 10, 25, 50, 100], nu_vals=[2, 6, 12, 18]):
-    params = get_free_params()
+def calculate_range(ranges_dict, band, params=get_lsco_params(), label_dict={},
+                    extra_labels_dict={}, omegas=np.linspace(-20, 20, 100)):
     bandObject = BandStructure(**params)
     bandObject.runBandStructure()
-
-    vary_value("free", "gamma_k", "gamma_k", gamma_k_vals,
-               np.linspace(0, 20, 100), params, bandObject)
-    # vary_value("free", "power", "power", nu_vals,
-    #            np.linspace(0, 20, 100), params, bandObject)
-
-    # params["gamma_k"] = 0
-    # vary_value("free_iso", "Bamp", "B", B_vals,
-    #            np.linspace(-20, 20, 100), params, bandObject)
-    # vary_value("free_iso", "gamma_0", "gamma_0", gamma_0_vals,
-    #            np.linspace(0, 20, 100), params, bandObject)
-    # params["gamma_k"] = 20
-    # vary_value("free_aniso", "Bamp", "B", B_vals,
-    #            np.linspace(-20, 20, 100), params, bandObject)
-    # vary_value("free_aniso", "gamma_0", "gamma_0", gamma_0_vals,
-    #            np.linspace(0, 20, 100), params, bandObject)
-
-
-def calculate_lsco(
-        B_vals=[0, 50, 100, 150, 200], gamma_0_vals=[10, 15, 20, 25],
-        gamma_k_vals=[0, 10, 25, 50, 100], nu_vals=[2, 6, 12, 18],
-        gamma_k_default=20, nu_default=6):
-    params = get_lsco_params()
-    bandObject = BandStructure(**params)
-    bandObject.runBandStructure()
-    
-    # vary_value("NdLSCO", "gamma_k", "gamma_k", gamma_k_vals,
-    #            np.linspace(0, 20, 100), params, bandObject)
-    # vary_value("NdLSCO", "power", "power", nu_vals,
-    #            np.linspace(0, 20, 100), params, bandObject)
-
-    params["gamma_k"] = 0
-    vary_value("NdLSCO_iso", "Bamp", "B", B_vals,
-               np.linspace(-20, 20, 50), params, bandObject)
-    # vary_value("NdLSCO_iso", "gamma_0", "gamma_0", [10, 15, 20, 25],
-    #            np.linspace(0, 20, 100), params, bandObject)
-
-    for gamma_k in gamma_k_vals:
-        params["gamma_k"] = gamma_k
-        vary_value("NdLSCO_aniso", "Bamp", "B", B_vals,
-                    np.linspace(-20, 20, 50), params, bandObject,
-                    f"_gamma_k_{gamma_k}_nu_{nu_default}")
-    # params["gamma_k"] = gamma_k_default
-    # for nu in nu_vals:
-    #     params["power"] = nu
-    #     vary_value("NdLSCO_aniso", "Bamp", "B", B_vals,
-    #                 np.linspace(-20, 20, 50), params, bandObject,
-    #                 f"_gamma_k_{gamma_k_default}_nu_{nu}")
-
-    # vary_value("NdLSCO_aniso", "gamma_0", "gamma_0", gamma_0_vals,
-    #            np.linspace(0, 20, 100), params, bandObject)
+    for vary_param in ranges_dict:
+        params_copy = params.copy()
+        value_label = (label_dict[vary_param] if vary_param in label_dict
+                       else vary_param)
+        vary_value(band, vary_param, value_label, ranges_dict[vary_param],
+                   omegas, params_copy, bandObject,
+                   extra_labels_dict.get(vary_param, ""))
 
 
 def generate_figure_single(sigma_substript="xx", figsize=(9.2, 5.6)):
@@ -348,18 +303,71 @@ def plot_lsco_iso_vs_aniso_vary_gamma_0(gamma_0_vals=[10, 15, 20, 25]):
     plt.show()
 
 
+def plot_vary_general(
+        value_label, value_latex, values, band, title=None,
+        extra_label_data="", extra_label_plot="", figsize=(10, 8),
+        non_varying_params=[], non_varying_latex=[], **kwargs):
+    fig, axs = generate_figure_single(figsize=figsize, sigma_substript="ll/rr")
+    title = title if title else band
+    axs[0].set_title(title)
+    plot_data(axs, band, value_label, value_latex, values,
+              extra_label=extra_label_data, **kwargs)
+    axs[1].legend(loc="upper left", fontsize=20, frameon=False, ncols=2,
+                  labelspacing=0.3, borderpad=0.3, borderaxespad=0.3,
+                  columnspacing=0.5)
+    non_varying_params_text = "\n".join(
+        [f"${non_varying_latex[i]} = {non_varying_params[i]}$"
+         for i in range(len(non_varying_params))])
+    axs[1].text(0.97, 0.05, non_varying_params_text, fontsize=20,
+                transform=axs[1].transAxes, ha="right", va="bottom")
+    fig.tight_layout()
+    fig.savefig("user_plots/comparisons/"
+                f"{band}{extra_label_plot}_vary_{value_label}.pdf")
+    plt.show()
+
+
+def plot_vary_general_all(ranges, band, title, params=get_lsco_params(),
+                          extra_label_data="", extra_label_plot="",
+                          figsize=(10, 8), **kwargs):
+    for param_name in ranges:
+        non_varying_params = [params[param] for param in ranges
+                              if param != param_name]
+        non_varying_latex = [latex_dict[param] for param in ranges
+                             if param != param_name]
+        plot_vary_general(
+            param_name, latex_dict[param_name], ranges[param_name], band,
+            title=title, extra_label_data=extra_label_data,
+            extra_label_plot=extra_label_plot, figsize=figsize,
+            non_varying_params=non_varying_params,
+            non_varying_latex=non_varying_latex, **kwargs)
+
+
+ranges_dict = {
+    # "Bamp": [0, 50, 100, 150, 200],
+    "gamma_0": [5, 10, 15, 20, 25],
+    "gamma_k": [0, 10, 25, 50, 100],
+    "power": [2, 6, 10, 14, 18],
+}
+
+labels_dict = {
+    "Bamp": "B"
+}
+
+latex_dict = {
+    "Bamp": "B",
+    "gamma_0": "\\Gamma_0",
+    "gamma_k": "\\Gamma_k",
+    "power": "\\nu"
+}
+
+
+def main():
+    calculate_range(ranges_dict, "LSCO", label_dict=labels_dict,
+                    extra_labels_dict={param_name: "_B_30T"
+                                       for param_name in ranges_dict})
+    plot_vary_general_all(ranges_dict, "LSCO", "LSCO, B = 30 T", lw=2,
+                          extra_label_data="_B_30T", extra_label_plot="_B_30T")
+
+
 if __name__ == "__main__":
-    # calculate_free()
-    calculate_lsco(gamma_k_vals=[20], B_vals=[0, 4, 9, 14, 20, 31])
-    # plot_free_vary_gamma_k()
-    # plot_free_vary_power()
-    # plot_lsco_vary_gamma_k()
-    # plot_lsco_vary_power()
-    # plot_free_iso_vs_aniso_vary_B()
-    # plot_free_iso_vs_aniso_vary_gamma_0()
-    # for gamma_k in [2, 4, 6, 8]:
-    #     plot_lsco_iso_vs_aniso_vary_B(gamma_k=gamma_k)
-    # for nu in [2, 6, 12, 18]:
-    #     plot_lsco_iso_vs_aniso_vary_B(gamma_k=5, nu=nu)
-    plot_lsco_iso_vs_aniso_vary_B(gamma_k=20, B_vals=[0, 4, 9, 14, 20, 31])
-    # plot_lsco_iso_vs_aniso_vary_gamma_0()
+    main()
