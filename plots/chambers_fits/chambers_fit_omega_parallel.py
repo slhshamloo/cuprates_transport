@@ -163,11 +163,12 @@ def run_fit_multi_field_parallel(
                 [ranges_dict[key][1] for key in param_keys]]
         polished_fit = least_squares(
             chambers_residual_multi_field, global_fit.x, bounds=bounds,
-            args=(param_keys, omegas, sigmas, band_obj, init_params, False))
+            args=(param_keys, fields, omegas, sigmas,
+                  band_obj, init_params, False))
         for i, param_key in enumerate(param_keys):
             lmfit_pars[param_key].value = polished_fit.x[i]
         local_fit_lmfit = convert_scipy_result_to_lmfit(
-            polished_fit, fields, lmfit_pars, param_keys, len(omegas), True)
+            polished_fit, lmfit_pars, param_keys, len(omegas), True)
         return local_fit_lmfit
     else:
         return convert_scipy_result_to_lmfit(
