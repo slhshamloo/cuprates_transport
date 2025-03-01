@@ -44,7 +44,7 @@ def chambers_residual(lmfit_pars, omegas, sigmas,
         setattr(cond_obj, "omega", omega)
         cond_obj.chambers_func()
         sigma_fit[i] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]
-                        ).conjugate() * 1e-5
+                        ) * 1e-5
 
     return (sigmas - sigma_fit).view(float)
 

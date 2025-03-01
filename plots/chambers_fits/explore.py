@@ -18,7 +18,7 @@ def chambers_residual(omegas, sigmas, band_obj, params):
         setattr(cond_obj, "omega", omega)
         cond_obj.chambers_func()
         sigma_fit[i] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]
-                        ).conjugate() * 1e-5
+                        ) * 1e-5
 
     return np.mean(np.abs(sigmas-sigma_fit) ** 2)
 
@@ -47,16 +47,16 @@ def get_init_params():
         "a": 3.75,
         "b": 3.75,
         "c": 13.2,
-        "energy_scale": 160,
+        "energy_scale": 70,
         "band_params":{"mu":-0.758, "t": 1, "tp":-0.12,
                        "tpp":0.06, "tz": 0.07},
         "res_xy": 20,
         "res_z": 5,
         "N_time": 1000,
         "Bamp": 9,
-        "gamma_0": 8.0,
-        "gamma_k": 1e4,
-        "power": 5.59,
+        "gamma_0": 10.0,
+        "gamma_k": 5,
+        "power": 6,
         # "gamma_dos_max": 50,
         "march_square": True,
         "parallel": False
@@ -83,7 +83,7 @@ def calculate_residual_plane(
     band_obj = BandStructure(**get_init_params())
     band_obj.runBandStructure()
     residuals = np.empty_like(x_vals)
-    with ProcessPoolExecutor(max_workers=12) as executor:
+    with ProcessPoolExecutor(max_workers=8) as executor:
         for (i, res) in enumerate(tqdm(executor.map(
                 calculate_residual, [x_label]*x_vals.size,
                 [y_label]*y_vals.size, x_vals, y_vals,
@@ -117,20 +117,17 @@ def plot_residual_plane(xy, residuals, vary_x_label, vary_y_label,
 
 
 def main():
+    extra_label = "_gamma_0_10"
     # xy, residuals = calculate_residual_plane(
-    #     "power", "gamma_k", [1, 15], [1.0, 1e4], 10, 10,
-    #     "legros", "OD17K", 9, extra_label="_gamma_0_8")
-    extra_label = "_power_8"
+    #     "gamma_0", "gamma_k", [1, 15], [5e2, 5e3], 10, 10,
+    #     "legros", "OD17K", 31, extra_label=extra_label)
     xy = np.load(os.path.dirname(os.path.relpath(__file__))
                  + f"/explore/xy_OD17K_9T{extra_label}.npy")
     residuals = np.load(os.path.dirname(os.path.relpath(__file__))
                         + f"/explore/residuals_OD17K_9T{extra_label}.npy")
-    # plot_residual_plane(xy, residuals, r"$\nu$", r"$\Gamma_k$",
-    #     r"Residuals for OD17K at 9T, $\Gamma_0=8$",
-    #     filename=f"residuals_OD17K_9T{extra_label}_power_gamma_k.pdf")
-    plot_residual_plane(xy, residuals, r"$\Gamma_0$", r"$\Gamma_k$",
-        r"Residuals for OD17K at 9T, $\nu_0=7.8$",
-        filename=f"residuals_OD17K_9T{extra_label}_gamma_0_gamma_k.pdf")
+    plot_residual_plane(xy, residuals, r"$\nu_0$", r"$\Gamma_k$",
+        r"Residuals for OD17K at 9T, $\Gamma_0=10$",
+        filename=f"residuals_OD17K_9T{extra_label}_power_gamma_k.pdf")
 
 
 if __name__ == "__main__":

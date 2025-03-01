@@ -33,7 +33,7 @@ def chambers_residual(param_values, param_keys, omegas, sigmas,
         setattr(cond_obj, "omega", omega)
         cond_obj.chambers_func()
         sigma_fit[i] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]
-                        ).conjugate() * 1e-5
+                        ) * 1e-5
     if reduce_error:
         return np.sum(np.abs(sigmas-sigma_fit)**2) / (
             len(omegas)-len(param_keys))
@@ -70,7 +70,7 @@ def chambers_residual_multi_field(
             setattr(cond_obj, "omega", omega)
             cond_obj.chambers_func()
             sigma_fit[i, j] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]
-                               ).conjugate() * 1e-5
+                               ) * 1e-5
 
     if reduce_error:
         return np.sum(np.abs(sigmas-sigma_fit)**2) / (

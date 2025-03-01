@@ -89,8 +89,7 @@ for B in fieldValues:
   w =  omegaValues * 1e12 # rad.s-1
   Ga = params["gamma_0"] * 1e12 # rad.s-1
   wc_sq = e**2*B**2/m**2 # (rad.s-1)2
-  # Conjugate because of time-derivative conventions (Legros et al. vs cuprates_transport)
-  results[:,2] = np.conjugate(1j*n*e**2/m * (w + 1j*Ga) / ((w + 1j*Ga)**2 - wc_sq))
+  results[:,2] = 1j*n*e**2/m * (w + 1j*Ga) / ((w + 1j*Ga)**2 - wc_sq)
 
   path = os.path.relpath(__file__)
   dirname, fname = os.path.split(path)
