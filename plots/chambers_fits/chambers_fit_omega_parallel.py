@@ -130,7 +130,7 @@ def run_fit_parallel(omegas, sigmas, init_params, ranges_dict, polish=True):
 
     if polish:
         bounds = [[ranges_dict[key][0] for key in param_keys],
-                [ranges_dict[key][1] for key in param_keys]]
+                  [ranges_dict[key][1] for key in param_keys]]
         polished_fit = least_squares(
             chambers_residual, global_fit.x, bounds=bounds,
             args=(param_keys, omegas, sigmas, band_obj, init_params, False))
