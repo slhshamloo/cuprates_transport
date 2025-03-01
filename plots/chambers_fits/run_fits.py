@@ -7,6 +7,7 @@ from concurrent.futures import ProcessPoolExecutor
 import sys
 sys.path.append(os.path.dirname(os.path.relpath(__file__)))
 from chambers_fit_omega import run_fit
+from chambers_fit_omega_parallel import run_fit_multi_field_parallel
 
 
 def load_data(paper, sample, field):
@@ -34,10 +35,10 @@ def get_init_params():
         "a": 3.76,
         "b": 3.76,
         "c": 13.22,
-        "energy_scale": 160,
+        "energy_scale": 80,
         "band_params":{"mu":-0.758, "t": 1, "tp":-0.12,
                        "tpp":0.06, "tz": 0.07},
-        "res_xy": 50,
+        "res_xy": 20,
         "res_z": 5,
         "N_time": 1000,
         "Bamp": 45,
@@ -51,7 +52,7 @@ def get_init_params():
 
 
 ranges_dict = {
-    # "energy_scale": [130, 190],
+    "energy_scale": [50, 100],
     # "tp": [-0.2,-0.1],
     # "tpp": [-0.10,0.04],
     # "tppp": [-0.1,0.1],
@@ -61,9 +62,9 @@ ranges_dict = {
     # "tz3": [0.001,0.08],
     # "tz4": [0.001,0.08],
     # "mu": [-0.7,-0.9],
-    "gamma_0": [1.0, 20.0],
-    "gamma_k": [1.0, 1e4],
-    "power":[1.0, 20.0],
+    "gamma_0": [1.0, 50.0],
+    "gamma_k": [1.0, 500],
+    "power":[1.0, 50.0],
     # "gamma_dos_max": [0.1, 200],
     # "factor_arcs" : [1, 300],
 }
@@ -167,6 +168,34 @@ def run_fits(paper, samples, fields):
             total=len(samples)))
         for i, fit_result in enumerate(results):
             save_fit(fit_result, samples[i], fields[i])
+
+
+def load_interp_multi_field(paper, sample, fields, nsample_polarity=20):
+    omegas = np.empty((len(fields), 2*nsample_polarity))
+    sigmas = np.empty((len(fields), 2*nsample_polarity), dtype=complex)
+    for i, field in enumerate(fields):
+        omega, sigma = load_data(paper, sample, field)
+        omega_l = omega[omega < 0]
+        omega_l = np.linspace(omega_l[0], omega_l[-1], nsample_polarity)
+        omega_r = omega[omega > 0]
+        omega_r = np.linspace(omega_r[0], omega_r[-1], nsample_polarity)
+        omegas[i] = np.concatenate((omega_l, omega_r))
+        sigma_l = np.interp(omega_l, omega[omega < 0], sigma[omega < 0])
+        sigma_r = np.interp(omega_r, omega[omega > 0], sigma[omega > 0])
+        sigmas[i] = np.concatenate((sigma_l, sigma_r))
+    return omegas, sigmas
+
+
+def run_fits_multi_field(paper, samples, fields, nsample_polarity=20):
+    for sample in samples:
+        omegas, sigmas = load_interp_multi_field(
+            paper, sample, fields, nsample_polarity)
+        init_params = get_init_params()
+        fit_result = run_fit_multi_field_parallel(
+            fields, omegas, sigmas, init_params, ranges_dict)
+        with open(os.path.dirname(os.path.relpath(__file__))
+                  + f"/params/{sample}_all.dat", 'w') as f:
+            f.write(lmfit.fit_report(fit_result))
 
 
 def main():
