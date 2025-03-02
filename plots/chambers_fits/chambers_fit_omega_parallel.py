@@ -90,8 +90,9 @@ def get_lmfit_pars(params, ranges):
 
 def convert_scipy_result_to_lmfit(
         result, lmfit_pars, param_keys, ndata, calc_err=True):
-    chi_sq = np.sum(result.fun**2)
+    chi_sq = result.fun * (ndata - len(param_keys))
     if calc_err:
+        chi_sq = np.sum(result.fun**2)
         if hasattr(result, 'jac'):
             cov_matrix = np.linalg.inv(result.jac.T@result.jac) * (
                 np.sum(result.fun**2) / (ndata-len(param_keys)))
@@ -168,8 +169,8 @@ def run_fit_multi_field_parallel(
         for i, param_key in enumerate(param_keys):
             lmfit_pars[param_key].value = polished_fit.x[i]
         local_fit_lmfit = convert_scipy_result_to_lmfit(
-            polished_fit, lmfit_pars, param_keys, len(omegas), True)
+            polished_fit, lmfit_pars, param_keys, omegas.size, True)
         return local_fit_lmfit
     else:
         return convert_scipy_result_to_lmfit(
-            global_fit, lmfit_pars, param_keys, len(omegas), False)
+            global_fit, lmfit_pars, param_keys, omegas.size, False)
