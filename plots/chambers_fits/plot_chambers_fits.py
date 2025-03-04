@@ -44,23 +44,24 @@ def load_data(paper, sample, field):
     sigma = sigma1 + 1j * sigma2
     return omega, sigma
 
-
+params = [151.6017691664, 5.8275378298, 657.766172417, 3.8966643853]
+B = 4
 def get_init_params():
     return {
         "band_name": "Nd-LSCO",
         "a": 3.75,
         "b": 3.75,
         "c": 13.2,
-        "energy_scale": 160,
+        "energy_scale": params[0],
         "band_params":{"mu":-0.758, "t": 1, "tp":-0.12,
                        "tpp":0.06, "tz": 0.07},
         "res_xy": 20,
         "res_z": 5,
         "N_time": 1000,
-        "Bamp": 45,
-        "gamma_0": 8.0, # 12.595,
-        "gamma_k": 3e3, # 63.823,
-        "power": 6.2,
+        "Bamp": B,
+        "gamma_0": params[1], # 12.595,
+        "gamma_k": params[2], # 63.823,
+        "power": params[3],
         # "gamma_dos_max": 50,
         "march_square": True
     }
@@ -89,10 +90,10 @@ def load_fit(sample, field):
 
 def generate_chambers_fit(sample, field, omegas, bypass_fit=False,
                           init_params=get_init_params()):
-    parameter_values, _ = load_fit(sample, field)
     params = deepcopy(init_params)
     params['Bamp'] = field
     if not bypass_fit:
+        parameter_values, _ = load_fit(sample, field)
         for parmeter_key, parameter_value in parameter_values.items():
             if parmeter_key in params:
                 params[parmeter_key] = parameter_value
@@ -172,9 +173,9 @@ def plot_chambers_fit(paper, sample, field, bypass_fit=False, save_fig=False):
     else:
         params = load_fit(sample, field)[0]
     axs[1].text(0.9, 0.05,
-                fr"$\Gamma_0 = {float(params["gamma_0"]):.3}$"
-                + "\n" + fr"$\Gamma_k = {float(params["gamma_k"]):.3}$"
-                + "\n" + fr"$\nu = {float(params["power"]):.3}$",
+                fr"$\Gamma_0 = {float(params['gamma_0']):.3}$"
+                + "\n" + fr"$\Gamma_k = {float(params['gamma_k']):.3}$"
+                + "\n" + fr"$\nu = {float(params['power']):.3}$",
                 transform=axs[1].transAxes,
                 ha="right", va="bottom", fontsize=20)
 
@@ -201,6 +202,6 @@ def plot_all_fits():
 
 
 if __name__ == "__main__":
-    output_all_fits()
-    plot_all_fits()
-    # plot_chambers_fit("legros", "OD17K", 9, bypass_fit=True)
+    #output_all_fits()
+    #plot_all_fits()
+    plot_chambers_fit("legros", "OD17K", B, bypass_fit=True)

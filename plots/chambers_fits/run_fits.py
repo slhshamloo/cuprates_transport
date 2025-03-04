@@ -3,10 +3,13 @@ import numpy as np
 import lmfit
 from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor
+import multiprocessing as mp
+
 
 import sys
 sys.path.append(os.path.dirname(os.path.relpath(__file__)))
 from chambers_fit_omega_parallel import run_fit_parallel
+from chambers_fit_allB_parallel import run_fit_allB_parallel
 
 
 def load_data(paper, sample, field):
@@ -38,13 +41,13 @@ def sampling_probas(t, sampling='quadratic_symmetric'):
     return baseSample/np.sum(baseSample)
 
 def downsampling(omega, sigma, minRadius, maxRadius, N):
-    sigma_presampled = sigma[maxRadius>omega & omega>minRadius] 
-    omega = omega[maxRadius>omega & omega>minRadius]
-    t_values = omega/(maxRadius-minRadius)
-
+    filterMin = (np.abs(omega)>minRadius)
+    filterMax = (np.abs(omega)<maxRadius)
+    filter = filterMin*filterMax
+    sigma, omega = sigma[filter], omega[filter]
+    t_values = (np.abs(omega)-minRadius)/(maxRadius-minRadius)
     idx = np.random.choice(np.arange(len(omega)), size=N, replace=False, p=sampling_probas(t_values))
-    sigma = sigma_presampled[idx]
-    omega = omega[idx]
+    sigma, omega = sigma[idx], omega[idx]
 
     return (sigma, omega)
 
@@ -55,7 +58,7 @@ def get_init_params():
         "a": 3.76,
         "b": 3.76,
         "c": 13.22,
-        "energy_scale": 160,
+        "energy_scale": 80,
         "band_params":{"mu":-0.758, "t": 1, "tp":-0.12,
                        "tpp":0.06, "tz": 0.07},
         "res_xy": 50,
@@ -72,7 +75,7 @@ def get_init_params():
 
 
 ranges_dict = {
-    # "energy_scale": [130, 190],
+    "energy_scale": [50, 110],
     # "tp": [-0.2,-0.1],
     # "tpp": [-0.10,0.04],
     # "tppp": [-0.1,0.1],
@@ -172,32 +175,44 @@ def export_fits_to_csv(samples, fields):
 def run_single_fit(paper, sample, field, ranges=ranges_dict,
                    init_params=get_init_params()):
     omega, sigma = load_data(paper, sample, field)
-    omega, sigma = downsampling(omega, sigma, minRadius=0.5, maxRadius=1.4, N=20)
+    omega, sigma = downsampling(omega, sigma, minRadius=3, maxRadius=9, N=20)
 
     init_params['Bamp'] = field
     return run_fit_parallel(omega, sigma, init_params, ranges)
 
+def run_single_fit_allB(paper, sample, fields, ranges=ranges_dict,
+                   init_params=get_init_params()):
+    omega_sigma_pairs = [load_data(paper, sample, field) for field in fields]
+    omega_sigma_pairs = [downsampling(omega, sigma, minRadius=3, maxRadius=9, N=20) for omega, sigma in omega_sigma_pairs]
+
+    return run_fit_allB_parallel(omega_sigma_pairs, fields, init_params, ranges)
+
 
 def run_fits(paper, samples, fields):
-    with ProcessPoolExecutor() as executor:
-        papers = [paper] * len(samples) * len(fields)
-        samples = [[sample] * len(fields) for sample in samples]
-        samples = [sample for sublist in samples for sample in sublist]
-        fields = [[field] for field in fields] * len(samples)
-        fields = [field for sublist in fields for field in sublist]
-        results = list(tqdm(
-            executor.map(run_single_fit, papers, samples, fields),
-            total=len(samples)))
-        for i, fit_result in enumerate(results):
-            save_fit(fit_result, samples[i], fields[i])
+    papers = [paper] * len(samples) * len(fields)
+    samples = [[sample] * len(fields) for sample in samples]
+    samples = [sample for sublist in samples for sample in sublist]
+    fields = [[field] for field in fields] * len(samples)
+    fields = [field for sublist in fields for field in sublist]
+    results = tqdm(map(run_single_fit, papers, samples, fields),
+        total=len(samples))
+    for i, fit_result in enumerate(results):
+        save_fit(fit_result, samples[i], fields[i])
 
+def run_fits_allB(paper, samples, fields):
+    papers = [paper for _ in samples]
+    fields = [fields for _ in samples]
+    results = map(run_single_fit_allB, papers, samples, fields)
+    for i, fit_result in enumerate(results):
+        save_fit(fit_result, samples[i], "all")
 
 def main():
     # run_fits("post", ["post50", "post45", "post40", "post35"],
     #          [0, 9, 20, 31])
     # run_fits("legros", ["NSC", "OD13K", "OD17K", "OD35K", "OD36K", "UD39K"],
     #          [0, 4, 9, 14, 20, 31])
-    run_fits("legros", ["OD17K"], [0, 4, 9, 14, 20, 31])
+    # run_fits("legros", ["OD17K"], [0, 4, 9, 14, 20, 31])
+    run_fits_allB("legros", ["OD17K"], [0,4])
     # run_fits_single_field("legros", "OD17K", 14)
     # export_fits_to_csv(
     #     ["NSC", "OD13K", "OD17K", "OD35K", "OD36K", "UD39K",
@@ -205,4 +220,5 @@ def main():
 
 
 if __name__ == "__main__":
+    mp.set_start_method('spawn')
     main()

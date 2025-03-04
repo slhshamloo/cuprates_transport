@@ -7,10 +7,15 @@ from cuprates_transport.bandstructure import BandStructure
 from cuprates_transport.conductivity import Conductivity
 import time
 import sys
+from functools import reduce
 
-
-def chambers_residual(param_values, param_keys, omegas, sigmas,
+def chambers_residual_allB(param_values, param_keys, omegaSigmaPairs, fields,
                       band_obj, init_params, reduce_error=True):
+    
+    lengths = [len(e[0]) for e in omegaSigmaPairs]
+    len_omegas = reduce(lambda x,y: x+y, lengths)
+    init_params = deepcopy(init_params)
+
     func_params = deepcopy(init_params)
     band_obj = deepcopy(band_obj)
     rerun_band = False
@@ -27,20 +32,31 @@ def chambers_residual(param_values, param_keys, omegas, sigmas,
             rerun_band = True
     if rerun_band:
         band_obj.runBandStructure()
-    cond_obj = Conductivity(band_obj, **func_params)
-    cond_obj.runTransport()
 
-    sigma_fit = np.empty_like(sigmas, dtype='complex')
-    for (i, omega) in enumerate(omegas):
-        setattr(cond_obj, "omega", omega)
-        cond_obj.chambers_func()
-        sigma_fit[i] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]
-                        ).conjugate() * 1e-5
+    def iteratorFunction(field, pairs):
+        sigmas, omegas = pairs
+        func_params['Bamp'] = field
+        cond_obj = Conductivity(band_obj, **func_params)
+        cond_obj.runTransport()
+
+        sigma_fit = np.empty_like(sigmas, dtype='complex')
+        for (i, omega) in enumerate(omegas):
+            setattr(cond_obj, "omega", omega)
+            cond_obj.chambers_func()
+            sigma_fit[i] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]
+                            ).conjugate() * 1e-5
+        if reduce_error:
+            return np.sum(np.abs(sigmas-sigma_fit)**2)
+        else:
+            return np.abs(sigmas-sigma_fit)
+    
+    residuals = map(iteratorFunction, fields, omegaSigmaPairs)
+    residual = reduce(lambda x,y: x+y, residuals)
+
     if reduce_error:
-        return np.sum(np.abs(sigmas-sigma_fit)**2) / (
-            len(omegas)-len(param_keys))
-    else:
-        return np.abs(sigmas-sigma_fit)
+        residual /= (len_omegas-len(param_keys))
+
+    return residual
 
 
 def get_lmfit_pars(params, ranges):
@@ -79,7 +95,9 @@ def convert_scipy_result_to_lmfit(
         bic=ndata*np.log(chi_sq/ndata) + len(param_keys)*np.log(ndata))
 
 
-def run_fit_parallel(omegas, sigmas, init_params, ranges_dict):
+def run_fit_allB_parallel(omega_sigma_pairs, fields, init_params, ranges_dict):
+
+    ## Handle the reporting at the end of each iteration
     globals()['iteration'] = 0
     globals()['time_iter'] = time.time()
     globals()['best_x'] = init_params
@@ -94,27 +112,32 @@ def run_fit_parallel(omegas, sigmas, init_params, ranges_dict):
             # text += "\tNew best:" + str([round(x, 10) for x in xk]) + "\tchi^2: %.3e" % obj_val
             text += "\tNew best:" + str([round(x, 10) for x in xk])
         print(text)
+        sys.stdout.flush()
     
-    band_obj = BandStructure(**init_params)
-    band_obj.runBandStructure()
-    param_keys = list(ranges_dict.keys())
+    ## Band objects for all fields
+    band_params = deepcopy(init_params)
+    band_obj = BandStructure(**band_params)
 
+    ## Bounds (are all the same)
+    param_keys = list(ranges_dict.keys())
     bounds = [ranges_dict[key] for key in param_keys]
     global_fit = differential_evolution(
-        chambers_residual, bounds, workers=-1, polish=False,
+        chambers_residual_allB, bounds, workers=-1, polish=False,
         x0=[init_params[key] for key in param_keys],
-        args=(param_keys, omegas, sigmas, band_obj, init_params, True), callback=fn)
+        args=(param_keys, omega_sigma_pairs, fields, band_obj, init_params, True), callback=fn)
     params = dict(zip(param_keys, global_fit.x))
     lmfit_pars = get_lmfit_pars(params, ranges_dict)
 
+    ## Polishing phase
     bounds = [[ranges_dict[key][0] for key in param_keys],
               [ranges_dict[key][1] for key in param_keys]]
     polished_fit = least_squares(
-        chambers_residual, global_fit.x, bounds=bounds,
-        args=(param_keys, omegas, sigmas, band_obj, init_params, False))
+        chambers_residual_allB, global_fit.x, bounds=bounds,
+        args=(param_keys, omega_sigma_pairs, fields, band_obj, init_params, False))
     for i, param_key in enumerate(param_keys):
         lmfit_pars[param_key].value = polished_fit.x[i]
+    total_len = reduce(lambda x,y: x+y, [len(e[0]) for e in omega_sigma_pairs])
     local_fit_lmfit = convert_scipy_result_to_lmfit(
-        polished_fit, lmfit_pars, param_keys, len(omegas), True)
+        polished_fit, lmfit_pars, param_keys, total_len, True)
     
-    return local_fit_lmfit
+    return local_fit_lmfit    
