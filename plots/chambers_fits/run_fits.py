@@ -70,7 +70,7 @@ def get_init_params():
         "power": 4.5,
         # "gamma_dos_max": 50,
         "march_square": True,
-        # "parallel": False
+        "parallel": False
     }
 
 
@@ -220,5 +220,4 @@ def main():
 
 
 if __name__ == "__main__":
-    mp.set_start_method('spawn')
     main()
