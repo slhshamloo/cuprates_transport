@@ -20,7 +20,7 @@ def chambers_residual(omegas, sigmas, band_obj, params):
         sigma_fit[i] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]
                         ) * 1e-5
 
-    return np.mean(np.abs(sigmas-sigma_fit) ** 2)
+    return np.abs(sigmas-sigma_fit) ** 2
 
 
 def load_data(paper, sample, field):
@@ -47,7 +47,7 @@ def get_init_params():
         "a": 3.75,
         "b": 3.75,
         "c": 13.2,
-        "energy_scale": 70,
+        "energy_scale": 80,
         "band_params":{"mu":-0.758, "t": 1, "tp":-0.12,
                        "tpp":0.06, "tz": 0.07},
         "res_xy": 20,
@@ -64,22 +64,31 @@ def get_init_params():
 
 
 def calculate_residual(x_label, y_label, x_val, y_val,
-                       field, band_obj, omegas, sigmas):
+                       fields, band_obj, omega_sigma_pairs):
     params = get_init_params()
-    params['Bamp'] = field
     params[x_label] = x_val
     params[y_label] = y_val
-    return chambers_residual(omegas, sigmas, band_obj, params)
+
+    res = []
+    for k in range(len(fields)):
+        params['Bamp'] = fields[k]
+        omegas, sigmas = omega_sigma_pairs[k]
+        res.append(chambers_residual(omegas, sigmas, band_obj, params))
+
+    return np.mean(res)
 
 
 def calculate_residual_plane(
         x_label, y_label, x_bounds, y_bounds, x_count, y_count,
-        paper, sample, field, extra_label=""):
+        paper, sample, fields, extra_label=""):
+    
+    if len(fields)==1: fieldDescr = fields[0]
+    else: fieldDescr = '-'.join([str(field) for field in fields])
     xy = np.mgrid[x_bounds[0]:x_bounds[1]:1j*x_count,
                   y_bounds[0]:y_bounds[1]:1j*y_count]
     x_vals = xy[0].flatten()
     y_vals = xy[1].flatten()
-    omegas, sigmas = load_data(paper, sample, field)
+    omega_sigma_pairs = [load_data(paper, sample, field) for field in fields]
     band_obj = BandStructure(**get_init_params())
     band_obj.runBandStructure()
     residuals = np.empty_like(x_vals)
@@ -87,14 +96,14 @@ def calculate_residual_plane(
         for (i, res) in enumerate(tqdm(executor.map(
                 calculate_residual, [x_label]*x_vals.size,
                 [y_label]*y_vals.size, x_vals, y_vals,
-                [field]*x_vals.size, [band_obj]*x_vals.size,
-                [omegas]*x_vals.size, [sigmas]*x_vals.size))):
+                [fields]*x_vals.size, [band_obj]*x_vals.size,
+                [omega_sigma_pairs]*x_vals.size), total=x_count*y_count)):
             residuals[i] = res
     residuals = residuals.reshape(x_count, y_count)
     np.save(os.path.dirname(os.path.relpath(__file__))
-            + f"/explore/xy_{sample}_{field}T{extra_label}.npy", xy)
+            + f"/explore/xy_{sample}_{fieldDescr}T{extra_label}.npy", xy)
     np.save(os.path.dirname(os.path.relpath(__file__))
-            + f"/explore/residuals_{sample}_{field}T{extra_label}.npy",
+            + f"/explore/residuals_{sample}_{fieldDescr}T{extra_label}.npy",
             residuals)
     return xy, residuals
 
@@ -118,16 +127,22 @@ def plot_residual_plane(xy, residuals, vary_x_label, vary_y_label,
 
 def main():
     extra_label = "_gamma_0_10"
-    # xy, residuals = calculate_residual_plane(
-    #     "gamma_0", "gamma_k", [1, 15], [5e2, 5e3], 10, 10,
-    #     "legros", "OD17K", 31, extra_label=extra_label)
-    xy = np.load(os.path.dirname(os.path.relpath(__file__))
-                 + f"/explore/xy_OD17K_9T{extra_label}.npy")
-    residuals = np.load(os.path.dirname(os.path.relpath(__file__))
-                        + f"/explore/residuals_OD17K_9T{extra_label}.npy")
+    fields = [0,4,9]
+    sample = "OD17K"
+
+    if len(fields)==1: fieldDescr = fields[0]
+    else: fieldDescr = '-'.join([str(field) for field in fields])
+
+    xy, residuals = calculate_residual_plane(
+        "gamma_0", "gamma_k", [1, 2.5], [5e3, 60e3], 10, 10,
+       "legros", sample, fields, extra_label=extra_label)
+    # xy = np.load(os.path.dirname(os.path.relpath(__file__))
+    #              + f"/explore/xy_{sample}_{fieldDescr}T{extra_label}.npy")
+    # residuals = np.load(os.path.dirname(os.path.relpath(__file__))
+    #                     + f"/explore/residuals_{sample}_{fieldDescr}T{extra_label}.npy")
     plot_residual_plane(xy, residuals, r"$\nu_0$", r"$\Gamma_k$",
-        r"Residuals for OD17K at 9T, $\Gamma_0=10$",
-        filename=f"residuals_OD17K_9T{extra_label}_power_gamma_k.pdf")
+        rf"Residuals for {sample} at {fieldDescr}T, $\Gamma_0=10$",
+        filename=f"residuals_{sample}_{fieldDescr}T{extra_label}_power_gamma_k.pdf")
 
 
 if __name__ == "__main__":
