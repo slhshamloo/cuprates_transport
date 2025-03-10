@@ -99,17 +99,18 @@ def load_fit(sample, fields):
     return parameter_values, parameter_errors
 
 
-def load_fits(samples, fields):
+def load_fits(samples, fieldss):
     parameter_values = {}
     parameter_errors = {}
     parameter_samples = {}
     parameter_fields = {}
     for sample in samples:
-        for field in fields:
+        for fields in fieldss:
+            fieldString = '-'.join([str(f) for f in fields])
             if os.path.exists(os.path.dirname(os.path.relpath(__file__))
-                              + f"/params/{sample}_{field}T.dat"):
+                              + f"/params/{sample}_{fieldString}T.dat"):
                 parameter_values_file, parameter_errors_file = (
-                    load_fit(sample, field))
+                    load_fit(sample, fields))
                 for value_name in parameter_values_file:
                     if value_name not in parameter_values:
                         parameter_values[value_name] = []
@@ -121,17 +122,17 @@ def load_fits(samples, fields):
                     parameter_errors[value_name].append(
                         parameter_errors_file[value_name])
                     parameter_samples[value_name].append(sample)
-                    parameter_fields[value_name].append(field)
+                    parameter_fields[value_name].append(fieldString)
     return (parameter_values, parameter_errors,
             parameter_samples, parameter_fields)
 
 
-def export_fits_to_csv(samples, fields):
+def export_fits_to_csv(samples, fieldss):
     parameter_values, parameter_errors, parameter_samples, parameter_fields = (
-        load_fits(samples, fields))
+        load_fits(samples, fieldss))
     with open(os.path.dirname(os.path.relpath(__file__))
               + "/fit_params.csv", 'w') as f:
-        f.write("sample,field,")
+        f.write("sample,fields,")
         for i, key in enumerate(sorted(parameter_values.keys())):
             if i != len(parameter_values) - 1:
                 f.write(f"{key},{key}_error,")
