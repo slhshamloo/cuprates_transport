@@ -1,6 +1,7 @@
 import argparse
 import run_fits
 import plot_chambers_fits
+import defaults
 
 free_params = ['gamma_0', 'gamma_k', 'power', 'energy_scale']
 default_params = ['gamma_0,1.0,50.0', 'gamma_k,1.0,500.0', 'power,1.0,50.0', 'energy_scale,50.0,100.0']
@@ -8,11 +9,16 @@ default_params = ['gamma_0,1.0,50.0', 'gamma_k,1.0,500.0', 'power,1.0,50.0', 'en
 
 def fitting(args):
     ranges = dict()
+    init_params = defaults.get_init_params()
     extraInfo = ""
     for param, lbound, ubound in args.parameters:
         ranges[param] = [lbound, ubound]
         extraInfo += f"{param}({round(lbound,1)}-{round(ubound,1)})"
-    result = run_fits.run_single_fit(args.paper, args.sample, args.fields, ranges)
+    
+    for param, value in args.initial:
+        init_params[param] = value
+
+    result = run_fits.run_single_fit(args.paper, args.sample, args.fields, ranges, init_params)
     if not args.textonly:
         run_fits.save_fit(result, args.sample, args.fields, extraInfo)
 
@@ -43,11 +49,11 @@ def parse_params(tri):
 
 def parse_overrides(pairs):
     try:
-        param, lower_bound, upper_bound = tri.split(',')
+        param, lower_bound, upper_bound = pairs.split(',')
         if param not in free_params: argparse.ArgumentTypeError("Invalid parameter name")
         return param, float(lower_bound), float(upper_bound) 
     except ValueError:
-        raise argparse.ArgumentTypeError("Parameters to vary must be specified as 'str,float,float'")
+        raise argparse.ArgumentTypeError("Parameters to set must be specified as 'str,float'")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -91,6 +97,13 @@ if __name__ == "__main__":
                                 const=default_params,
                                 help="Set parameters to vary")
     
+    fitting_parser.add_argument('-i', '--initial',
+                             nargs='*',
+                             type=parse_overrides,
+                             help="Set initial parameter values for fit to override defaults"
+                             )
+
+    
     fitting_parser.set_defaults(func=fitting)
 
     ## Subcommand for exporting the fit results in bulk
@@ -118,8 +131,8 @@ if __name__ == "__main__":
                                 help="Select varied parameters")
     plotting_parser.add_argument('-o', '--override',
                                  nargs='*',
-                                 type=pars_overrides,
-                                 help="OVERRIDE the computed fit parameters"
+                                 type=parse_overrides,
+                                 help="OVERRIDE all computed fit parameters with defaults and specified params"
                                  )
     plotting_parser.set_defaults(func=plotting)
 
