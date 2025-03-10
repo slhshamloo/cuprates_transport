@@ -4,16 +4,16 @@ import plot_chambers_fits
 import defaults
 
 free_params = ['gamma_0', 'gamma_k', 'power', 'energy_scale']
-default_params = ['gamma_0,1.0,50.0', 'gamma_k,1.0,500.0', 'power,1.0,50.0', 'energy_scale,50.0,100.0']
 
 
 def fitting(args):
     ranges = dict()
     init_params = defaults.get_init_params()
     extraInfo = ""
-    for param, lbound, ubound in args.parameters:
-        ranges[param] = [lbound, ubound]
-        extraInfo += f"{param}({round(lbound,1)}-{round(ubound,1)})"
+    if args.parameters is not None:
+        for param, lbound, ubound in args.parameters:
+            ranges[param] = [lbound, ubound]
+            extraInfo += f"{param}({round(lbound,1)}-{round(ubound,1)})"
     
     if args.initial is not None:
         extraInfo += ";init"
@@ -66,6 +66,9 @@ def parse_overrides(pairs):
     except ValueError:
         raise argparse.ArgumentTypeError("Parameters to set must be specified as 'str,float'")
 
+def error_no_command(args):
+    raise argparse.ArgumentError(None, "Choose a command")
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
                                     prog="Chambers' formula fitting",
@@ -74,18 +77,19 @@ if __name__ == "__main__":
                                             evolution with a Chambers' formula model",
                                     epilog="")
     
+    parser.set_defaults(func=error_no_command)
+    
     subparsers = parser.add_subparsers(help='TODO subcommand help')
     ### Subcommand allowing to perform all the fits
     fitting_parser = subparsers.add_parser('fit', help='Perform fits and save them to files')
     ## Required positional arguments
-    fitting_parser.add_argument('paper', required=True,
+    fitting_parser.add_argument('paper',
                                 help="The paper from which the sample to fit is extracted")
-    fitting_parser.add_argument('sample', required=True,
+    fitting_parser.add_argument('sample',
                                 help="The sample on which to perform the fit")
     fitting_parser.add_argument('fields',
                                 nargs="+",  # expects ≥ 1 arguments
                                 type=int,
-                                required=True,
                                 help="The field values (at least one expected) for \
                                         which to perform the fit. They will be fitted together.")    
     ## Optional flags
@@ -94,7 +98,6 @@ if __name__ == "__main__":
                                 help="Disable saving the results")
     
     fitting_parser.add_argument('-P', '--parallel',
-                                action='store_true',
                                 nargs='?',
                                 type=int,
                                 const=-1,
@@ -104,8 +107,6 @@ if __name__ == "__main__":
     fitting_parser.add_argument('-p', '--parameters',
                                 nargs='*',
                                 type=parse_params,
-                                default=default_params,
-                                const=default_params,
                                 help="Set parameters to vary")
     
     fitting_parser.add_argument('-i', '--initial',
@@ -127,22 +128,19 @@ if __name__ == "__main__":
 
     ## Subcommand for plotting the fit results
     plotting_parser = subparsers.add_parser('plot', help='Use to plot figures of fits')
-    plotting_parser.add_argument('paper', required=True,
+    plotting_parser.add_argument('paper',
                                 help="The paper from which the sample to fit was extracted")
-    plotting_parser.add_argument('sample', required=True,
+    plotting_parser.add_argument('sample',
                                 help="The sample on which the fit was done")
     plotting_parser.add_argument('fields',
                                 nargs="+",  # expects ≥ 1 arguments
                                 type=int,
-                                required=True,
                                 help="The field values (at least one expected) for \
                                         at which the fit was done.")    
     ## Optional flags        
     plotting_parser.add_argument('-p', '--parameters',
                                 nargs='*',
                                 type=parse_params,
-                                default=default_params,
-                                const=default_params,
                                 help="Select varied parameters")
     plotting_parser.add_argument('-o', '--override',
                                  nargs='*',

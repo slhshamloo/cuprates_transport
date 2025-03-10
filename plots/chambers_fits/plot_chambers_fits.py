@@ -83,9 +83,9 @@ def plot_chambers_fit(paper, sample, field, bypass_fit=False, save_fig=False):
     else:
         params = load_fit(sample, field)[0]
     axs[1].text(0.9, 0.05,
-                fr"$\Gamma_0 = {float(params["gamma_0"]):.3}$"
-                + "\n" + fr"$\Gamma_k = {float(params["gamma_k"]):.3}$"
-                + "\n" + fr"$\nu = {float(params["power"]):.3}$",
+                fr"$\Gamma_0 = {float(params['gamma_0']):.3}$"
+                + "\n" + fr"$\Gamma_k = {float(params['gamma_k']):.3}$"
+                + "\n" + fr"$\nu = {float(params['power']):.3}$",
                 transform=axs[1].transAxes,
                 ha="right", va="bottom", fontsize=20)
 
