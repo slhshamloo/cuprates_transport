@@ -70,9 +70,10 @@ ranges_dict = {
 }
 
 
-def save_fit(fit_result, sample, field, extra_info=""):
+def save_fit(fit_result, sample, fields, extra_info=""):
+    fieldString = '-'.join([str(f) for f in fields])
     with open(os.path.dirname(os.path.relpath(__file__))
-              + f"/params/{sample}_{field}T{extra_info}.dat", 'w') as f:
+              + f"/params/{sample}_{fieldString}T{extra_info}.dat", 'w') as f:
         f.write(lmfit.fit_report(fit_result))
 
 
