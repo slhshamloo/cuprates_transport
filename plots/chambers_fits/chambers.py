@@ -14,9 +14,10 @@ def fitting(args):
     for param, lbound, ubound in args.parameters:
         ranges[param] = [lbound, ubound]
         extraInfo += f"{param}({round(lbound,1)}-{round(ubound,1)})"
-    
+    extraInfo += ";init"
     for param, value in args.initial:
         init_params[param] = value
+        extraInfo += f"{param}({round(value,1)})"
 
     result = run_fits.run_single_fit(args.paper, args.sample, args.fields, ranges, init_params)
     if not args.textonly:
@@ -102,6 +103,10 @@ if __name__ == "__main__":
                              type=parse_overrides,
                              help="Set initial parameter values for fit to override defaults"
                              )
+    
+    group = fitting_parser.add_mutually_exclusive_group()
+    group.add_argument('--im', action='store_true', help="Fit imaginary part only")
+    group.add_argument('--re', action='store_false', help="Fit real part only")
 
     
     fitting_parser.set_defaults(func=fitting)
