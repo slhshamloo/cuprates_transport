@@ -154,6 +154,8 @@ def export_fits_to_csv(samples, fieldss):
 
 def run_single_fit(paper, sample, field, ranges=ranges_dict,
                    init_params=get_init_params()):
+    if isinstance(field, list):
+        run_fits_multi_field(paper, [sample], field, nsample_polarity=20)
     omega, sigma = load_data(paper, sample, field)
     init_params['Bamp'] = field
     return run_fit(omega, sigma, init_params, ranges)
@@ -196,8 +198,9 @@ def run_fits_multi_field(paper, samples, fields, nsample_polarity=20):
         init_params = get_init_params()
         fit_result = run_fit_multi_field_parallel(
             fields, omegas, sigmas, init_params, ranges_dict)
+        fieldString = '-'.join([str(f) for f in fields])
         with open(os.path.dirname(os.path.relpath(__file__))
-                  + f"/params/{sample}_all.dat", 'w') as f:
+                  + f"/params/{sample}_{fieldString}T.dat", 'w') as f:
             f.write(lmfit.fit_report(fit_result))
 
 
