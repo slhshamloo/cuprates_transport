@@ -77,11 +77,12 @@ def save_fit(fit_result, sample, fields, extra_info=""):
         f.write(lmfit.fit_report(fit_result))
 
 
-def load_fit(sample, field):
+def load_fit(sample, fields):
     parameter_values = {}
     parameter_errors = {}
+    fieldString = '-'.join([str(f) for f in fields])
     with open(os.path.dirname(os.path.relpath(__file__))
-              + f"/params/{sample}_{field}T.dat", 'r') as f:
+              + f"/params/{sample}_{fieldString}T.dat", 'r') as f:
         while True:
             line = f.readline()
             if not line:
