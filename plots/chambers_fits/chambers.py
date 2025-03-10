@@ -14,12 +14,22 @@ def fitting(args):
     for param, lbound, ubound in args.parameters:
         ranges[param] = [lbound, ubound]
         extraInfo += f"{param}({round(lbound,1)}-{round(ubound,1)})"
-    extraInfo += ";init"
-    for param, value in args.initial:
-        init_params[param] = value
-        extraInfo += f"{param}({round(value,1)})"
+    
+    if args.initial is not None:
+        extraInfo += ";init"
+        for param, value in args.initial:
+            init_params[param] = value
+            extraInfo += f"{param}({round(value,1)})"
+    
+    fitting_mode = 0
+    if args.im is not None:
+        extraInfo += ";im_only"
+        fitting_mode = 1
+    if args.re is not None:
+        extraInfo += ";re_only"
+        fitting_mode = 2
 
-    result = run_fits.run_single_fit(args.paper, args.sample, args.fields, ranges, init_params)
+    result = run_fits.run_single_fit(args.paper, args.sample, args.fields, ranges, init_params, fitting_mode)
     if not args.textonly:
         run_fits.save_fit(result, args.sample, args.fields, extraInfo)
 
