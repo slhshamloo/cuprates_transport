@@ -2,52 +2,98 @@ import argparse
 import run_fits
 import plot_chambers_fits
 import defaults
+import file_operations
 
 free_params = ['gamma_0', 'gamma_k', 'power', 'energy_scale']
 
+def compute_extra_info(parameters, initial, im, re):
+    extra_info = ""
+        
+    if args.parameters is not None:
+        for param, lbound, ubound in args.parameters:
+            extra_info += f"{param}({round(lbound,1)}-{round(ubound,1)})"
+
+    if args.initial is not None:
+        extra_info += "__init"
+        for param, value in args.initial:
+            extra_info += f"{param}({round(value,1)})"
+
+    if args.im:
+        extra_info += "__im_only"
+    if args.re:
+        extra_info += "__re_only"
+    
+    return extra_info
+
+
+
 
 def fitting(args):
+    ## SETUP : Translate user-provided CL arguments to parameters
+    # Generate unique string for chosen experiment
+    extra_info = compute_extra_info(args.parameters, args.initial, args.im, args.re)
+
+    # Setting custom bounds (and thus free parameters)
     ranges = dict()
-    init_params = defaults.get_init_params()
-    extraInfo = ""
     if args.parameters is not None:
         for param, lbound, ubound in args.parameters:
             ranges[param] = [lbound, ubound]
-            extraInfo += f"{param}({round(lbound,1)}-{round(ubound,1)})"
+        print("Using custom ranges")
+        print(ranges)
+    else:
+        print("No ranges provided, using default ranges")
+        ranges = defaults.get_ranges()
+        print(ranges)
     
+    # Setting custom initial parameters
+    init_params = defaults.get_init_params()
     if args.initial is not None:
-        extraInfo += ";init"
         for param, value in args.initial:
             init_params[param] = value
-            extraInfo += f"{param}({round(value,1)})"
     
+    # The fitting mode allows to fit on Re or Im parts only
     fitting_mode = 0
-    if args.im is not None:
-        extraInfo += ";im_only"
+    if args.re:
         fitting_mode = 1
-    if args.re is not None:
-        extraInfo += ";re_only"
+    if args.im:
         fitting_mode = 2
 
-    result = run_fits.run_single_fit(args.paper, args.sample, args.fields, ranges, init_params, fitting_mode)
+    print(f"Fitting mode (0: full, 1: real only, 2: imaginary only): {fitting_mode}")
+    ## RUN : Load and fit the data using previously determined settings
+    # Load and interpolate the experimental data
+    omegas, sigmas = run_fits.load_interp_multi_field(
+        args.paper, args.sample, args.fields, fitting_mode, nsample_polarity=20)
+    # Run the fitting procedure
+    fit_result = run_fits.run_fit_multi_field_parallel(
+        args.fields, omegas, sigmas, init_params, ranges, fitting_mode)
+
+    ## OUTPUT : Save and display results
     if not args.textonly:
-        run_fits.save_fit(result, args.sample, args.fields, extraInfo)
+        file_operations.save_fit(fit_result, args.sample, args.fields, extra_info)
 
 def exporting(args):
     pass
 
 def plotting(args):
     # Bypass case
-    if args.bypass:
-        values = dict()
-        for param, value in args.setparams:
+    if args.override is not None:
+        print("Plotting with custom values (provided override defaults)")
+        extra_info = "fixed_"
+        values = defaults.get_init_params()
+        for param, value in args.override:
             values[param] = value
-            extraInfo += f"{param}(value)"
-
-        plot_chambers_fits.plot_chambers_fit(args.paper, args.sample, args.fields, bypass_fit=True, save_fig=args.savefig)
+            extra_info += f"{param}({round(value,1)})"
+        plot_chambers_fits.from_parameters(args.paper, args.sample, args.fields, extra_info, None, values)
     # Non bypass case
     else:
-        plot_chambers_fits.plot_chambers_fit(args.paper, args.sample, args.fields, save_fig=args.savefig)
+        print("Plotting from fitted values")
+        non_override = dict()
+        if args.initial is not None:
+            for param, value in args.initial:
+                non_override[param] = value
+
+        extra_info = compute_extra_info(args.parameters, args.initial, args.im, args.re)
+        plot_chambers_fits.from_parameters(args.paper, args.sample, args.fields, extra_info, non_override)
 
 
 def parse_params(tri):
@@ -60,9 +106,9 @@ def parse_params(tri):
 
 def parse_overrides(pairs):
     try:
-        param, lower_bound, upper_bound = pairs.split(',')
+        param, value = pairs.split(',')
         if param not in free_params: argparse.ArgumentTypeError("Invalid parameter name")
-        return param, float(lower_bound), float(upper_bound) 
+        return param, float(value)
     except ValueError:
         raise argparse.ArgumentTypeError("Parameters to set must be specified as 'str,float'")
 
@@ -116,8 +162,8 @@ if __name__ == "__main__":
                              )
     
     group = fitting_parser.add_mutually_exclusive_group()
-    group.add_argument('--im', action='store_true', help="Fit imaginary part only")
-    group.add_argument('--re', action='store_false', help="Fit real part only")
+    group.add_argument('-I', '--im', action='store_true', help="Fit imaginary part only")
+    group.add_argument('-R', '--re', action='store_true', help="Fit real part only")
 
     
     fitting_parser.set_defaults(func=fitting)
@@ -137,16 +183,25 @@ if __name__ == "__main__":
                                 type=int,
                                 help="The field values (at least one expected) for \
                                         at which the fit was done.")    
-    ## Optional flags        
+    ## Optional flags 
+    group2 = plotting_parser.add_mutually_exclusive_group()
+    group2.add_argument('-I', '--im', action='store_true', help="Fit imaginary part only")
+    group2.add_argument('-R', '--re', action='store_true', help="Fit real part only")
+       
     plotting_parser.add_argument('-p', '--parameters',
                                 nargs='*',
                                 type=parse_params,
-                                help="Select varied parameters")
+                                help="Parameters that were varied")
+    
+    plotting_parser.add_argument('-i', '--initial',
+                             nargs='*',
+                             type=parse_overrides,
+                             help="Initial parameter values that were provided"
+                             )
     plotting_parser.add_argument('-o', '--override',
-                                 nargs='*',
-                                 type=parse_overrides,
-                                 help="OVERRIDE all computed fit parameters with defaults and specified params"
-                                 )
+                             nargs='*',
+                             type=parse_overrides,
+                             help="OVERRIDE and BYPASS fitting, plot using defaults and provided parameters")
     plotting_parser.set_defaults(func=plotting)
 
     args = parser.parse_args()

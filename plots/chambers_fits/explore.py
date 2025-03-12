@@ -6,6 +6,7 @@ from concurrent.futures import ProcessPoolExecutor
 from cuprates_transport.bandstructure import BandStructure
 from cuprates_transport.conductivity import Conductivity
 from matplotlib import pyplot as plt
+from matplotlib import colors as clr
 
 
 def chambers_residual(omegas, sigmas, band_obj, params):
@@ -44,10 +45,10 @@ def load_data(paper, sample, field):
 def get_init_params():
     return {
         "band_name": "Nd-LSCO",
-        "a": 3.75,
-        "b": 3.75,
-        "c": 13.2,
-        "energy_scale": 80,
+        "a": 3.76,
+        "b": 3.76,
+        "c": 13.22,
+        "energy_scale": 160,
         "band_params":{"mu":-0.758, "t": 1, "tp":-0.12,
                        "tpp":0.06, "tz": 0.07},
         "res_xy": 20,
@@ -55,7 +56,7 @@ def get_init_params():
         "N_time": 1000,
         "Bamp": 9,
         "gamma_0": 10.0,
-        "gamma_k": 5,
+        "gamma_k": 100,
         "power": 6,
         # "gamma_dos_max": 50,
         "march_square": True,
@@ -112,7 +113,7 @@ def plot_residual_plane(xy, residuals, vary_x_label, vary_y_label,
                         title, filename=""):
     fig, ax = plt.subplots(figsize=(10, 8))
     c = ax.imshow(
-        residuals.swapaxes(0, 1), norm='log', cmap='viridis', origin='lower',
+        residuals.swapaxes(0, 1), norm=clr.LogNorm(), cmap='viridis', origin='lower',
         extent=[xy[0].min(), xy[0].max(), xy[1].min(), xy[1].max()],
         aspect='auto')
     fig.colorbar(c, ax=ax)
@@ -122,19 +123,19 @@ def plot_residual_plane(xy, residuals, vary_x_label, vary_y_label,
     fig.tight_layout()
     fig.savefig(os.path.dirname(os.path.relpath(__file__))
                 + f"/explore/{filename}", bbox_inches='tight')
-    plt.show()
+    #plt.show()
 
 
 def main():
-    extra_label = "_gamma_0_10"
-    fields = [0,4,9]
+    extra_label = "_energy_scale_160_gamma_k_100"
+    fields = [0,4,9, 14, 20, 31]
     sample = "OD17K"
 
     if len(fields)==1: fieldDescr = fields[0]
     else: fieldDescr = '-'.join([str(field) for field in fields])
 
     xy, residuals = calculate_residual_plane(
-        "gamma_0", "gamma_k", [1, 2.5], [5e3, 60e3], 10, 10,
+        "gamma_0", "power", [1, 30], [1, 5], 10, 10,
        "legros", sample, fields, extra_label=extra_label)
     # xy = np.load(os.path.dirname(os.path.relpath(__file__))
     #              + f"/explore/xy_{sample}_{fieldDescr}T{extra_label}.npy")

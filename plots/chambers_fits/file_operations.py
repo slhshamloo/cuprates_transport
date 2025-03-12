@@ -4,8 +4,9 @@ from copy import deepcopy
 
 from cuprates_transport.bandstructure import BandStructure
 from cuprates_transport.conductivity import Conductivity
-
+import plot_chambers_fits
 import defaults
+import lmfit
 
 ### From plot_chambers_fits.py
 
@@ -26,11 +27,19 @@ def load_data(paper, sample, field):
     sigma = sigma1 + 1j * sigma2
     return omega, sigma
 
-def load_fit(sample, field):
+def save_fit(fit_result, sample, fields, extra_info):
+    fieldString = '-'.join([str(f) for f in fields])
+    with open(os.path.dirname(os.path.relpath(__file__))
+              + f"/params/{sample}_{fieldString}T{extra_info}.dat", 'w') as f:
+        f.write(lmfit.fit_report(fit_result))
+
+
+def load_fit(sample, fields, extra_info=""):
     parameter_values = {}
     parameter_errors = {}
+    fieldString = '-'.join([str(f) for f in fields])
     with open(os.path.dirname(os.path.relpath(__file__))
-              + f"/params/{sample}_{field}T.dat", 'r') as f:
+              + f"/params/{sample}_{fieldString}T{extra_info}.dat", 'r') as f:
         while True:
             line = f.readline()
             if not line:
@@ -46,32 +55,10 @@ def load_fit(sample, field):
             line = f.readline()
     return parameter_values, parameter_errors
 
-def generate_chambers_fit(sample, field, omegas, bypass_fit=False,
-                          init_params=defaults.get_init_params()):
-    parameter_values, _ = load_fit(sample, field)
-    params = deepcopy(init_params)
-    params['Bamp'] = field
-    if not bypass_fit:
-        for parmeter_key, parameter_value in parameter_values.items():
-            if parmeter_key in params:
-                params[parmeter_key] = parameter_value
-            else:
-                params['band_params'][parmeter_key] = parameter_value
-    band_obj = BandStructure(**params)
-    band_obj.runBandStructure()
-    cond_obj = Conductivity(band_obj, **params)
-    cond_obj.runTransport()
-    sigma = np.empty_like(omegas, dtype=complex)
-    for i, omega in enumerate(omegas):
-        setattr(cond_obj, "omega", omega)
-        cond_obj.chambers_func()
-        sigma[i] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]
-                    ).conjugate() * 1e-5
-    return sigma
 
 
 def save_fit_output_data(sample, field, omegas):
-    sigma = generate_chambers_fit(sample, field, 2*np.pi*omegas)
+    sigma = plot_chambers_fits.generate_chambers_fit(sample, field, 2*np.pi*omegas)
     np.savetxt(os.path.dirname(os.path.relpath(__file__))
                + f"/outputs/{sample}_{field}T.csv",
                np.column_stack((omegas, sigma.real, sigma.imag)),

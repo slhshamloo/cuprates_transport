@@ -3,6 +3,7 @@ import numpy as np
 import lmfit
 from tqdm import tqdm
 from concurrent.futures import ProcessPoolExecutor
+from defaults import get_ranges, get_init_params
 
 import sys
 sys.path.append(os.path.dirname(os.path.relpath(__file__)))
@@ -29,60 +30,22 @@ def load_data(paper, sample, field):
     return omega, sigma
 
 
-def get_init_params():
-    return {
-        "band_name": "LSCO",
-        "a": 3.76,
-        "b": 3.76,
-        "c": 13.22,
-        "energy_scale": 80,
-        "band_params":{"mu":-0.758, "t": 1, "tp":-0.12,
-                       "tpp":0.06, "tz": 0.07},
-        "res_xy": 20,
-        "res_z": 5,
-        "N_time": 1000,
-        "Bamp": 45,
-        "gamma_0": 7.5, # 12.595,
-        "gamma_k": 1000, # 63.823,
-        "power": 4.5,
-        # "gamma_dos_max": 50,
-        "march_square": True,
-        # "parallel": False
-    }
-
-
-ranges_dict = {
-    "energy_scale": [50, 100],
-    # "tp": [-0.2,-0.1],
-    # "tpp": [-0.10,0.04],
-    # "tppp": [-0.1,0.1],
-    # "tpppp": [-0.05,0.05],
-    # "tz": [0.001,0.08],
-    # "tz2": [0.001,0.08],
-    # "tz3": [0.001,0.08],
-    # "tz4": [0.001,0.08],
-    # "mu": [-0.7,-0.9],
-    "gamma_0": [1.0, 50.0],
-    "gamma_k": [1.0, 500],
-    "power":[1.0, 50.0],
-    # "gamma_dos_max": [0.1, 200],
-    # "factor_arcs" : [1, 300],
-}
 
 
 def save_fit(fit_result, sample, fields, extra_info=""):
     fieldString = '-'.join([str(f) for f in fields])
     with open(os.path.dirname(os.path.relpath(__file__))
               + f"/params/{sample}_{fieldString}T{extra_info}.dat", 'w') as f:
+        print(fit_result)
         f.write(lmfit.fit_report(fit_result))
 
 
-def load_fit(sample, fields):
+def load_fit(sample, fields, extraInfo=""):
     parameter_values = {}
     parameter_errors = {}
     fieldString = '-'.join([str(f) for f in fields])
     with open(os.path.dirname(os.path.relpath(__file__))
-              + f"/params/{sample}_{fieldString}T.dat", 'r') as f:
+              + f"/params/{sample}_{fieldString}T{extraInfo}.dat", 'r') as f:
         while True:
             line = f.readline()
             if not line:
@@ -99,16 +62,18 @@ def load_fit(sample, fields):
     return parameter_values, parameter_errors
 
 
-def load_fits(samples, fieldss):
+def load_fits(samples, fieldss, extraInfos=None):
+    if extraInfos is None:
+        extraInfos = [""]*len(samples)*len(fieldss)
     parameter_values = {}
     parameter_errors = {}
     parameter_samples = {}
     parameter_fields = {}
-    for sample in samples:
-        for fields in fieldss:
+    for i, sample in enumerate(samples):
+        for j, fields in enumerate(fieldss):
             fieldString = '-'.join([str(f) for f in fields])
             if os.path.exists(os.path.dirname(os.path.relpath(__file__))
-                              + f"/params/{sample}_{fieldString}T.dat"):
+                              + f"/params/{sample}_{fieldString}T{extraInfos[i*len(samples)+j]}.dat"):
                 parameter_values_file, parameter_errors_file = (
                     load_fit(sample, fields))
                 for value_name in parameter_values_file:
@@ -152,10 +117,8 @@ def export_fits_to_csv(samples, fieldss):
                                 f"{parameter_errors[key][i]}\n")
 
 
-def run_single_fit(paper, sample, field, ranges=ranges_dict,
-                   init_params=get_init_params()):
-    if isinstance(field, list):
-        run_fits_multi_field(paper, [sample], field, nsample_polarity=20)
+def run_single_fit(paper, sample, field, ranges=get_ranges(),
+                   init_params=get_init_params(), fitting_mode=0, extraInfo=""):
     omega, sigma = load_data(paper, sample, field)
     init_params['Bamp'] = field
     return run_fit(omega, sigma, init_params, ranges)
@@ -175,7 +138,8 @@ def run_fits(paper, samples, fields):
             save_fit(fit_result, samples[i], fields[i])
 
 
-def load_interp_multi_field(paper, sample, fields, nsample_polarity=20):
+def load_interp_multi_field(paper, sample, fields, fitting_mode, nsample_polarity=20):
+    """ Load the experimental data and interpolate """
     omegas = np.empty((len(fields), 2*nsample_polarity))
     sigmas = np.empty((len(fields), 2*nsample_polarity), dtype=complex)
     for i, field in enumerate(fields):
@@ -188,21 +152,21 @@ def load_interp_multi_field(paper, sample, fields, nsample_polarity=20):
         sigma_l = np.interp(omega_l, omega[omega < 0], sigma[omega < 0])
         sigma_r = np.interp(omega_r, omega[omega > 0], sigma[omega > 0])
         sigmas[i] = np.concatenate((sigma_l, sigma_r))
+    if fitting_mode == 1:
+        print("Loading real data only")
+        sigmas = [np.real(s) for s in sigmas]
+    elif fitting_mode == 2:
+        print("Loading imaginary data only")
+        sigmas = [np.imag(s) for s in sigmas]
     return omegas, sigmas
 
 
-def run_fits_multi_field(paper, samples, fields, nsample_polarity=20):
-    for sample in samples:
-        omegas, sigmas = load_interp_multi_field(
-            paper, sample, fields, nsample_polarity)
-        init_params = get_init_params()
-        fit_result = run_fit_multi_field_parallel(
-            fields, omegas, sigmas, init_params, ranges_dict)
-        fieldString = '-'.join([str(f) for f in fields])
-        with open(os.path.dirname(os.path.relpath(__file__))
-                  + f"/params/{sample}_{fieldString}T.dat", 'w') as f:
-            f.write(lmfit.fit_report(fit_result))
-
+def run_fits_multi_field(paper, sample, fields, init_params=get_init_params(), ranges_dict=get_ranges(), fitting_mode=0, nsample_polarity=20):
+    # Load the experimental data and interpolate
+    omegas, sigmas = load_interp_multi_field(
+        paper, sample, fields, fitting_mode, nsample_polarity)
+    return run_fit_multi_field_parallel(
+        fields, omegas, sigmas, init_params, ranges_dict, fitting_mode)
 
 def main():
     # run_fits("post", ["post50", "post45", "post40", "post35"],
