@@ -27,18 +27,26 @@ python plots/chambers_fits/chambers.py fit legros OD17K 0 4 9 14 20 31 -p energy
 ======
 
 
-
-python plots/chambers_fits/chambers.py fit legros OD17K 31 --re
+#!/bin/bash
+python plots/chambers_fits/chambers.py fit legros OD17K 31 --re 
 python plots/chambers_fits/chambers.py fit legros OD17K 31 -R -p energy_scale,50,200 gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,20.0 
-python plots/chambers_fits/chambers.py fit legros OD17K 31 -R -p gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,5.0 -i energy_scale,160 
 python plots/chambers_fits/chambers.py fit legros OD17K 20 --re 
-python plots/chambers_fits/chambers.py fit legros OD17K 20 -R -p gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,5.0 -i energy_scale,160 
+python plots/chambers_fits/chambers.py fit legros OD17K 20 -R -p energy_scale,50,200 gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,20.0 
+python plots/chambers_fits/chambers.py fit legros OD17K 0 4 14 20 31 --re 
+python plots/chambers_fits/chambers.py fit legros OD17K 0 4 14 20 31 -R -p energy_scale,50,200 gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,20.0 
+
+#!/bin/bash
+python plots/chambers_fits/chambers.py fit legros OD17K 9 --re
+python plots/chambers_fits/chambers.py fit legros OD17K 9 -R -p energy_scale,50,200 gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,20.0 
+python plots/chambers_fits/chambers.py fit legros OD17K 0 4 9 14 31 --re 
+python plots/chambers_fits/chambers.py fit legros OD17K 0 4 9 14 31 -R -p energy_scale,50,200 gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,20.0 
 python plots/chambers_fits/chambers.py fit legros OD17K 14 --re 
-python plots/chambers_fits/chambers.py fit legros OD17K 9 --re 
-python plots/chambers_fits/chambers.py fit legros OD17K 9 -R -p gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,5.0 -i energy_scale,160 
-python plots/chambers_fits/chambers.py fit legros OD17K 4 --re 
-python plots/chambers_fits/chambers.py fit legros OD17K 4 --R -p energy_scale,50,200 gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,20.0 
-python plots/chambers_fits/chambers.py fit legros OD17K 4 -R -p gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,5.0 -i energy_scale,160 
+python plots/chambers_fits/chambers.py fit legros OD17K 14 -R -p energy_scale,50,200 gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,20.0 
+
+#!/bin/bash
 python plots/chambers_fits/chambers.py fit legros OD17K 0 --re 
+python plots/chambers_fits/chambers.py fit legros OD17K 0 -R -p energy_scale,50,200 gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,20.0 
 python plots/chambers_fits/chambers.py fit legros OD17K 0 4 9 14 20 31 --re 
-python plots/chambers_fits/chambers.py fit legros OD17K 0 4 9 14 20 31 -R -p gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,5.0 -i energy_scale,160 
+python plots/chambers_fits/chambers.py fit legros OD17K 0 4 9 14 20 31 -R -p energy_scale,50,200 gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,20.0 
+python plots/chambers_fits/chambers.py fit legros OD17K 0 4 9 20 31 --re 
+python plots/chambers_fits/chambers.py fit legros OD17K 0 4 9 20 31 -R -p energy_scale,50,200 gamma_0,1.0,200 gamma_k,1.0,2000 power,1.0,20.0 
