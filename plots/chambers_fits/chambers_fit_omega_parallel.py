@@ -71,14 +71,16 @@ def chambers_residual_multi_field(
         for (j, omega) in enumerate(omegas[i]):
             setattr(cond_obj, "omega", omega)
             cond_obj.chambers_func()
-            if fitting_mode == 0:
-                sigma_fit[i, j] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]) * 1e-5
-            elif fitting_mode == 1:
-                sigma_fit[i, j] = (cond_obj.sigma[0, 0]) * 1e-5
-                print(np.imag(sigmas-sigma_fit))
-                sys.stdout.flush()
-            else :
-                sigma_fit[i, j] = (1j*cond_obj.sigma[0, 1]) * 1e-5
+            sigma_fit[i, j] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]) * 1e-5
+
+    if fitting_mode == 0:
+        func = np.abs
+    elif fitting_mode == 1:
+        func = np.real
+    elif fitting_mode == 2:
+        func = np.imag
+    else:
+        raise ValueError("Invalid fitting mode")
 
     if reduce_error:
         return np.sum(np.abs(sigmas-sigma_fit)**2) / (

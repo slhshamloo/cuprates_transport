@@ -138,7 +138,7 @@ def run_fits(paper, samples, fields):
             save_fit(fit_result, samples[i], fields[i])
 
 
-def load_interp_multi_field(paper, sample, fields, fitting_mode, nsample_polarity=20):
+def load_interp_multi_field(paper, sample, fields, nsample_polarity=20):
     """ Load the experimental data and interpolate """
     omegas = np.empty((len(fields), 2*nsample_polarity))
     sigmas = np.empty((len(fields), 2*nsample_polarity), dtype=complex)
@@ -152,12 +152,6 @@ def load_interp_multi_field(paper, sample, fields, fitting_mode, nsample_polarit
         sigma_l = np.interp(omega_l, omega[omega < 0], sigma[omega < 0])
         sigma_r = np.interp(omega_r, omega[omega > 0], sigma[omega > 0])
         sigmas[i] = np.concatenate((sigma_l, sigma_r))
-    if fitting_mode == 1:
-        print("Loading real data only")
-        sigmas = [np.real(s) for s in sigmas]
-    elif fitting_mode == 2:
-        print("Loading imaginary data only")
-        sigmas = [np.imag(s) for s in sigmas]
     return omegas, sigmas
 
 

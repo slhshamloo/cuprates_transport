@@ -62,7 +62,7 @@ def fitting(args):
     ## RUN : Load and fit the data using previously determined settings
     # Load and interpolate the experimental data
     omegas, sigmas = run_fits.load_interp_multi_field(
-        args.paper, args.sample, args.fields, fitting_mode, nsample_polarity=20)
+        args.paper, args.sample, args.fields, nsample_polarity=20)
     # Run the fitting procedure
     fit_result = run_fits.run_fit_multi_field_parallel(
         args.fields, omegas, sigmas, init_params, ranges, fitting_mode)
