@@ -9,11 +9,11 @@ import defaults
 
 ### From plot_chambers_fits.py
 
-def generate_chambers_fit(sample, field, omegas, bypass_fit=False,
+def generate_chambers_fit(sample, field, fit_fields, omegas, bypass_fit=False,
                           init_params=defaults.get_init_params()):
-    parameter_values, _ = load_fit(sample, field)
+    parameter_values, _ = load_fit(sample, fit_fields)
     params = deepcopy(init_params)
-    params['Bamp'] = field
+    params['Bamp'] = -field
     if not bypass_fit:
         for parmeter_key, parameter_value in parameter_values.items():
             if parmeter_key in params:
@@ -29,7 +29,7 @@ def generate_chambers_fit(sample, field, omegas, bypass_fit=False,
         setattr(cond_obj, "omega", omega)
         cond_obj.chambers_func()
         sigma[i] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]
-                    ).conjugate() * 1e-5
+                    ) * 1e-5
     return sigma
 
 def load_data(paper, sample, field):
@@ -79,8 +79,8 @@ def load_fit(sample, fields, extra_info=""):
 
 
 
-def save_fit_output_data(sample, field, omegas):
-    sigma = generate_chambers_fit(sample, field, 2*np.pi*omegas)
+def save_fit_output_data(sample, field, fit_fields, omegas):
+    sigma = generate_chambers_fit(sample, field, fit_fields, 2*np.pi*omegas)
     np.savetxt(os.path.dirname(os.path.relpath(__file__))
                + f"/outputs/{sample}_{field}T.csv",
                np.column_stack((omegas, sigma.real, sigma.imag)),

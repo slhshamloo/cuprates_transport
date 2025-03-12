@@ -52,7 +52,8 @@ def generate_figure(figsize=(9.2, 5.6)):
     return fig, axs
 
 
-def plot_chambers_fit(paper, sample, field, bypass_fit=False, save_fig=False, extra_info=""):
+def plot_chambers_fit(paper, sample, field, bypass_fit=False,
+                      save_fig=False, extra_info=""):
     fig, axs = generate_figure()
     omega_data, sigma_data = load_data(paper, sample, field)
     if bypass_fit:
@@ -82,10 +83,11 @@ def plot_chambers_fit(paper, sample, field, bypass_fit=False, save_fig=False, ex
         params = get_init_params()
     else:
         params = load_fit(sample, [field])[0]
-    axs[1].text(0.9, 0.05,
-                fr"$\Gamma_0 = {float(params['gamma_0']):.3}$"
-                + "\n" + fr"$\Gamma_k = {float(params['gamma_k']):.3}$"
-                + "\n" + fr"$\nu = {float(params['power']):.3}$",
+    axs[1].text(0.98, 0.05,
+                fr"$\Gamma_0 = {float(params['gamma_0']):.3g}$, "
+                + fr"$\Gamma_k = {float(params['gamma_k']):.3g}$"
+                + "\n" + fr"$\nu = {float(params['power']):.3g}$, "   
+                + fr"$t = {float(params['energy_scale']):.3g}$",      
                 transform=axs[1].transAxes,
                 ha="right", va="bottom", fontsize=20)
 
@@ -199,7 +201,7 @@ def output_all_fits():
         for field in [0, 4, 9, 14, 20, 31]:
             omega_data, _ = load_data("legros", sample, field)
             omega_fit = np.linspace(omega_data.min(), omega_data.max(), 50)
-            save_fit_output_data(sample, field, omega_fit)
+            save_fit_output_data(sample, field, [0, 4, 9, 14, 20, 31], omega_fit)
 
 
 def plot_all_fits():
@@ -209,6 +211,6 @@ def plot_all_fits():
 
 
 if __name__ == "__main__":
-    #output_all_fits()
+    output_all_fits()
     plot_all_fits()
     # plot_chambers_fit("legros", "OD17K", 9, bypass_fit=True)
