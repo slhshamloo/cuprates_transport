@@ -83,10 +83,10 @@ def chambers_residual_multi_field(
         raise ValueError("Invalid fitting mode")
 
     if reduce_error:
-        return np.sum(np.abs(sigmas-sigma_fit)**2) / (
+        return np.sum(func(sigmas-sigma_fit)**2) / (
             omegas.size-len(param_keys))
     else:
-        return np.abs(sigmas-sigma_fit).flatten()
+        return func(sigmas-sigma_fit).flatten()
 
 
 def get_lmfit_pars(params, ranges):
