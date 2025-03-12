@@ -4,11 +4,33 @@ from copy import deepcopy
 
 from cuprates_transport.bandstructure import BandStructure
 from cuprates_transport.conductivity import Conductivity
-import plot_chambers_fits
-import defaults
 import lmfit
+import defaults
 
 ### From plot_chambers_fits.py
+
+def generate_chambers_fit(sample, field, omegas, bypass_fit=False,
+                          init_params=defaults.get_init_params()):
+    parameter_values, _ = load_fit(sample, field)
+    params = deepcopy(init_params)
+    params['Bamp'] = field
+    if not bypass_fit:
+        for parmeter_key, parameter_value in parameter_values.items():
+            if parmeter_key in params:
+                params[parmeter_key] = parameter_value
+            else:
+                params['band_params'][parmeter_key] = parameter_value
+    band_obj = BandStructure(**params)
+    band_obj.runBandStructure()
+    cond_obj = Conductivity(band_obj, **params)
+    cond_obj.runTransport()
+    sigma = np.empty_like(omegas, dtype=complex)
+    for i, omega in enumerate(omegas):
+        setattr(cond_obj, "omega", omega)
+        cond_obj.chambers_func()
+        sigma[i] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]
+                    ).conjugate() * 1e-5
+    return sigma
 
 def load_data(paper, sample, field):
     omega_dict = {}
@@ -58,7 +80,7 @@ def load_fit(sample, fields, extra_info=""):
 
 
 def save_fit_output_data(sample, field, omegas):
-    sigma = plot_chambers_fits.generate_chambers_fit(sample, field, 2*np.pi*omegas)
+    sigma = generate_chambers_fit(sample, field, 2*np.pi*omegas)
     np.savetxt(os.path.dirname(os.path.relpath(__file__))
                + f"/outputs/{sample}_{field}T.csv",
                np.column_stack((omegas, sigma.real, sigma.imag)),

@@ -30,34 +30,12 @@ mpl.rcParams['axes.linewidth'] = 1.0
 # TrueType allows editing the text in illustrator
 mpl.rcParams['pdf.fonttype'] = 3
 
+generate_chambers_fit = file_operations.generate_chambers_fit
 load_data = file_operations.load_data
 load_fit = file_operations.load_fit
 load_fit_output_data = file_operations.load_fit_output_data
 save_fit_output_data = file_operations.save_fit_output_data
 get_init_params = defaults.get_init_params
-
-def generate_chambers_fit(sample, field, omegas, bypass_fit=False,
-                          init_params=defaults.get_init_params()):
-    parameter_values, _ = load_fit(sample, field)
-    params = deepcopy(init_params)
-    params['Bamp'] = field
-    if not bypass_fit:
-        for parmeter_key, parameter_value in parameter_values.items():
-            if parmeter_key in params:
-                params[parmeter_key] = parameter_value
-            else:
-                params['band_params'][parmeter_key] = parameter_value
-    band_obj = BandStructure(**params)
-    band_obj.runBandStructure()
-    cond_obj = Conductivity(band_obj, **params)
-    cond_obj.runTransport()
-    sigma = np.empty_like(omegas, dtype=complex)
-    for i, omega in enumerate(omegas):
-        setattr(cond_obj, "omega", omega)
-        cond_obj.chambers_func()
-        sigma[i] = (cond_obj.sigma[0, 0] + 1j*cond_obj.sigma[0, 1]
-                    ).conjugate() * 1e-5
-    return sigma
 
 
 def generate_figure(figsize=(9.2, 5.6)):
@@ -103,7 +81,7 @@ def plot_chambers_fit(paper, sample, field, bypass_fit=False, save_fig=False, ex
     if bypass_fit:
         params = get_init_params()
     else:
-        params = load_fit(sample, field)[0]
+        params = load_fit(sample, [field])[0]
     axs[1].text(0.9, 0.05,
                 fr"$\Gamma_0 = {float(params['gamma_0']):.3}$"
                 + "\n" + fr"$\Gamma_k = {float(params['gamma_k']):.3}$"
@@ -231,6 +209,6 @@ def plot_all_fits():
 
 
 if __name__ == "__main__":
-    output_all_fits()
+    #output_all_fits()
     plot_all_fits()
     # plot_chambers_fit("legros", "OD17K", 9, bypass_fit=True)
