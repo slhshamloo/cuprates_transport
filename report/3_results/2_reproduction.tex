@@ -1,0 +1,25 @@
+\subsection{Reproduction of the Drude fits}
+We could reproduce most of the results of Legros et al. (Figure \ref{fig:drude_fit_good}).
+However, no matter how much we fine-tuned the fitting procedure, we could not produce fits looking
+as good as theirs for some of the plots (Figure \ref{fig:drude_fit_bad}). So, we tried fitting the
+real part and the imaginary part of the optical conductivity separately, and we could produce
+similar-looking fits. Extracting the parameters from these fits and comparing them to the parameters
+extracted from the fits of Legros et al., we found that the parameters were consistent. This leads
+us to believe this is indeed what Legros et al. did in their analysis. This is not ``correct'' in
+some sense, but since the imaginary part of the optical conductivity is dominated by a
+superconducting singularity, fitting it separately is a reasonable choice.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/drude_fit_good.pdf}
+    \caption{A good fit while fitting the real and imaginary parts of the optical conductivity
+        simultaneously.}
+    \label{fig:drude_fit_good}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/drude_fit_bad.pdf}
+    \caption{A bad fit while fitting the real and imaginary parts of the optical conductivity
+        simultaneously.}
+    \label{fig:drude_fit_bad}
+\end{figure}
