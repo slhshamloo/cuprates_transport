@@ -1,1 +1,15 @@
 \subsection{From ADMR to optical conductivity}
+% Our need to adapt it
+With our model chosen and the experimental data acquired, 
+we next needed to implement Chambers' formula to be able to fit the data and extract relevant parameters. 
+To do that, we were able to leverage existing code and packages without reinventing the wheel. \\
+
+% Context : There was already an existing code implementing Boltzmann transport calculations
+Indeed, when studying cuprate high-Tc superconductors, 
+Prof. Grissonnanche's group extensively uses a code he developed during his earlier work on Angle Dependent Magnetoresistance (ADMR) experiments. 
+This code is essentially implementing Chambers' formula in the DC case and is designed to vary the angle of the external field. 
+Therefore, we could build upon this very mature codebase to extend it to any value of $\omega$ by modifying the right functions.
+
+Our implementation introduces $\omega$ as an optional parameter defaulting to $0$. 
+This means that it is a non-breaking change that doesn't affect past functionality, 
+while allowing anyone to do optical conductivity calculations from now on. \\
