@@ -1,8 +1,13 @@
 \subsection{Plot digitization}
-Since the raw data of Legros et al. is not publicly available, we digitized the data from their
-paper using a custom script extracting the data from svg exports of the figures. Digital files of
-papers contain vector graphics, which encode path data for drawing lines. By reading this path data
-and using some reference points to set the scale, we can extract the data points from the plot.
-Doing the digitization exactly, instead of the more traditional hand-extraction, allowes us to
-avoid added errors through the digitization process and streamline the data extraction for many
-curves.
+Since the raw data of \textit{Legros et al.} is not publicly available, 
+we digitized the data from their paper using a custom script extracting the data from SVG exports of the figures. 
+Digital files of papers contain vector graphics, 
+which explicitly encode graphs as points and paths with given coordinates to draw lines. 
+A difficulty lies in matching what is visually one curve on a given graph to the associated points in the file structure definition 
+(this can depend greatly on the program and version that were used to generate the plot). 
+Once the file structure is analysed and understood, 
+we can extract the data points from the plot by reading the path data and using some reference points to set the scale.
+This is a direct and semi-automatic way to do plot digitization. 
+When compared to the more traditional hand-extraction where one has to manually click on different points of the graph, 
+this allows us to avoid added errors through the digitization process 
+and to streamline the data extraction, extracting many curves at once.
