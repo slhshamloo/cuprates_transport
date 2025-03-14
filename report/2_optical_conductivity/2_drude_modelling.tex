@@ -1,0 +1,42 @@
+\subsection{What are the hypotheses of the Drude model ?}
+As was stated previously, \textit{Legros et al.} used the Drude model to analyze their data. 
+This phenomenological model is common and of great use, but it assumes that we study 'free electrons' that only periodically get scattered with a scattering rate $\Gamma$, 
+which is strictly speaking false for electrons in solids, 
+where they interact with a periodic lattice.
+
+We can translate this hypothesis in the language of condensed matter physics and band structure theory (which will simplify the comparison with Chambers' formula later). 
+For a single electron, due to the periodicity of the lattice, 
+we can define a quasi-momentum $\vec{k}$ which is a good quantum number and defines states with given energies. 
+The filling of these levels according to Pauli's principle, by ascending energy, 
+allows us to define a Fermi energy and corresponding Fermi surface 
+which mostly determines the conduction properties of the material and can be, 
+in many cases, determined experimentally and modelled theoretically.
+
+What makes the Drude model useful is that in many cases, 
+this Fermi surface can be approximated by a sphere, which yields the dispersion relation $E(\vec{k}) = \frac{\hbar\vec{k}}{2m^*}$ 
+that is formally equivalent to that of a free electron (where $m^*$ is not necessarily $m_e$). 
+The Drude model assumes a unique scattering rate (independent of $\vec{k}$, because it doesn't introduce this quasi-momentum). \\
+
+In the end, Legros et al.\cite{legros2022} and others\cite{post2021} use the two-component Drude model with normal and superconducting carriers (in the presence of a magnetic field). 
+In this model, the complex optical conductivity in the left/right circular polarization basis is given by :
+\begin{equation}
+    \sigma_{ll/rr}(\omega) = i\epsilon_0\qty(
+        \frac{\omega^2_{\mathrm{p,n}}}{\omega-\omega_c+i\Gamma}
+        + \frac{\omega^2_{\mathrm{p,s}}}{\omega} - \omega(\epsilon_{\infty} - 1)),
+\end{equation}
+where $\omega$ is the frequency of the electromagnetic waves and the adjustable parameters are
+\begin{itemize}
+    \item $\omega_{\mathrm{p,n}}$ and $\omega_{\mathrm{p,s}}$: plasma frequencies of the normal and
+        superconducting charge carriers,
+    \item $\omega_c = \frac{eB}{m_c}$: cyclotron frequency,
+    \item $\Gamma$: scattering rate,
+    \item $\epsilon_{\infty}$: high-frequency dielectric constant.
+\end{itemize}
+Left handed circular polarization is given by a negative omega and right handed by a positive omega.
+
+As stated in \textit{Legros et al.} and other sources, 
+the high-frequency dielectric constant does not greatly improve the quality of the fit and its results, so it is set to 1.
+Additionally, we can see here that in this model, the superconducting carriers only contribute to the imaginary part of $\sigma$. 
+This ended up being relevant to inform our fitting choices in the end.
+
+

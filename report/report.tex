@@ -15,24 +15,28 @@
 
 \begin{document}
 \maketitle
-\include{1_introduction/1_lsi}
-\include{1_introduction/2_hightc}
-\include{1_introduction/3_qcp}
-\include{1_introduction/4_optical_conductivity}
-\include{1_introduction/5_boltzmann}
-\include{1_introduction/6_goals}
+\input{1_introduction/1_lsi}
+\input{1_introduction/2_hightc}
+\input{1_introduction/3_qcp}
+\input{1_introduction/4_optical_conductivity}
+\input{1_introduction/5_boltzmann}
+\input{1_introduction/6_goals}
 
-\section{Methods}
-\include{2_optical_conductivity/1_what_is_optical_conductivity}
-\include{2_optical_conductivity/2_drude_modelling}
-\include{2_optical_conductivity/3_chambers}
+\section{Optical Conductivity}
+\input{2_optical_conductivity/1_what_is_optical_conductivity}
+\input{2_optical_conductivity/2_drude_modelling}
+\input{2_optical_conductivity/3_chambers}
+
+\section{Codes and tools developed}
+\input{2bis_code_and_tools/1_plot_digitization}
+\input{2bis_code_and_tools/2_from_ADMR_to_optical_conductivity}
 
 \section{Results}
-\include{3_results/1_drude_vs_chambers}
-\include{3_results/2_reproduction}
-\include{3_results/3_fitting}
-\include{3_results/4_effective_mass}
-\include{3_results/5_discussion}
+\input{3_results/1_drude_vs_chambers}
+\input{3_results/2_reproduction}
+\input{3_results/3_fitting}
+\input{3_results/4_effective_mass}
+\input{3_results/5_discussion}
 
 \bibliographystyle{plain}
 \bibliography{ref}
