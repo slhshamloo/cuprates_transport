@@ -45,10 +45,28 @@ assert that they definitly did this to ``fix'' their fits.
 \end{figure}
 
 %%% We can show the reproduction of Post et al. too maybe ?
+We also used data from \textit{Post et al.} which we were able to reproduce quite well. 
+In this case, we had no particular issues during the fitting process except for a few extraneous points. 
+We were able to fit the data and recreate their plots that extract a field dependence for the $\omega_{p,n}$, $\omega_c$, and $\Gamma$ parameters of the Drude model.
+
+For $\omega_{p,n}$ and $\Gamma$, this is something that, in principle we wouldn't want to find in the result using Chambers' formula : 
+indeed, the scattering and the plasma frequency of the charge carriers should, 
+in principle, not depend on $B$.
 
 \begin{figure}
-    \centering
-    \includegraphics[width=0.7\textwidth]{figures/fitting_Drude_extracted_Gamma.pdf}
-    \caption{ADD SUBFIGURE A comparison of our and their fits with their data}
-    \label{fig:drude_fit_good}
+\centering
+\begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\textwidth]{example-image}
+    \caption{Our plot}
+    \label{fig:gamma_extraction_ours}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\textwidth]{example-image}
+    \caption{Their plot}
+    \label{fig:gamma_extraction_theirs}
+\end{subfigure}
+        
+\caption{Reproduction of \textit{Post et al.} data analysis and extraction of isotropic Drude scattering $\Gamma$ as a function of applied field $B$}
+\label{fig:reproduction_post}
 \end{figure}
