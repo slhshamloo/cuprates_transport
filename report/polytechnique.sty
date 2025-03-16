@@ -208,7 +208,7 @@
     {polytechnique-armes.eps}
 \fi
 \newlength{\margehaut}
-\setlength{\margehaut}{40mm}
+\setlength{\margehaut}{22.5mm}
 \newlength{\hauteurentete}
 \setlength{\hauteurentete}{27mm}
 \newlength{\separationentete}
@@ -301,28 +301,28 @@
 \newcommand{\enteteinterieurimpair}{
     \enteteinterieur{\polylogohori}
 }
-\newcommand{\entetes}{
-    \newpagestyle{polytechnique}{
-    \sethead[\raisebox{.5\hauteurlogohori}{\raisebox{-0.5\height}{\enteteinterieurpair}}]% left even
-            []% center even
-            [\raisebox{.5\hauteurlogohori}{\raisebox{-0.5\height}{\enteteexterieurpair}}]% right even
-            {\raisebox{.5\hauteurlogohori}{\raisebox{-0.5\height}{\enteteexterieurimpair}}}% left odd
-            {}% center odd
-            {\raisebox{.5\hauteurlogohori}{\raisebox{-0.5\height}{\enteteinterieurimpair}}}% right odd
-    \setfoot{}% left odd
-             {\piedcentre}% center odd
-             {}% right odd
-    }
-    \pagestyle{polytechnique}
-}
-\renewpagestyle{plain}{
-    \sethead{}% left
-            {}% center
-            {}% right
-    \setfoot{}% left
-            {\piedcentre}% center
-            {}% right
-}
+% \newcommand{\entetes}{
+%     \newpagestyle{polytechnique}{
+%     \sethead[\raisebox{.5\hauteurlogohori}{\raisebox{-0.5\height}{\enteteinterieurpair}}]% left even
+%             []% center even
+%             [\raisebox{.5\hauteurlogohori}{\raisebox{-0.5\height}{\enteteexterieurpair}}]% right even
+%             {\raisebox{.5\hauteurlogohori}{\raisebox{-0.5\height}{\enteteexterieurimpair}}}% left odd
+%             {}% center odd
+%             {\raisebox{.5\hauteurlogohori}{\raisebox{-0.5\height}{\enteteinterieurimpair}}}% right odd
+%     \setfoot{}% left odd
+%              {\piedcentre}% center odd
+%              {}% right odd
+%     }
+%     \pagestyle{polytechnique}
+% }
+% \renewpagestyle{plain}{
+%     \sethead{}% left
+%             {}% center
+%             {}% right
+%     \setfoot{}% left
+%             {\piedcentre}% center
+%             {}% right
+% }
 \pagestyle{plain}
 \newboolean{subtitle}\setboolean{subtitle}{false}
 \newcommand{\polysoustitresave}{}
@@ -340,7 +340,7 @@
     }{
         \renewcommand*{\polytitrecourtsave}{#1}
     }
-    \entetes
+    %\entetes
 }
 \newcommand{\polyauthorsave}{}
 \renewcommand*{\author}[1]{
