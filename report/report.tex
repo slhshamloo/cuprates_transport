@@ -1,6 +1,7 @@
 \documentclass[12pt]{article}
 \usepackage[a4paper,fancysections,titlepage]{polytechnique}
-\usepackage{amsmath,bm,empheq,graphicx,hyperref,siunitx,subcaption,upgreek,xcolor}
+\usepackage{amsmath,amssymb,bm,empheq,graphicx,hyperref,pifont,
+siunitx,subcaption,upgreek,xcolor}
 \usepackage[italicdiff]{physics}
 \usepackage[justification=centering]{caption}
 \usepackage{indentfirst}
@@ -8,6 +9,10 @@
 \usepackage{graphicx}
 \usepackage[section]{placeins}
 
+\newcommand{\emptybox}{$\square$}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
+\hspace{-2.5pt}}
 
 \hypersetup{colorlinks=true, urlcolor=cyan}
 \newcommand{\angstrom}{\textup{\AA}}
