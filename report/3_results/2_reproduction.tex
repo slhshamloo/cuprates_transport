@@ -1,4 +1,37 @@
 \subsection{Reproduction of the Drude fits}
+To start the reproduction procedure, we first used data from the predecessor to Legros et al., a 2021
+paper by Post et al.\cite{post2021} We did this because more of the fitting parameters were available
+and the data was more well behaved, so we could use it as a better starting point for developing our
+tools.
+
+We were able to reproduce the results of Post et al. quite well.  In this case, we had no particular
+issues during the fitting process except for a few extraneous points (see Figure
+\ref{fig:reproduction_post} for a comparison). We were able to fit the data
+and recreate their plots that extract a field dependence for the $\omega_{p,n}$, $\omega_c$,
+and $\Gamma$ parameters of the Drude model.
+
+For $\omega_{p,n}$ and $\Gamma$, field dependence is something that, in principle we wouldn't want to find in the result using Chambers' formula : 
+indeed, the scattering and the plasma frequency of the charge carriers should, 
+in principle, not depend on $B$.
+
+\begin{figure}
+\centering
+\begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\textwidth]{figures/gamma_theirs}
+    \caption{Their plot}
+    \label{fig:gamma_ours}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\textwidth]{figures/fitting_Drude_extracted_Gamma.pdf}
+    \caption{Our plot}
+    \label{fig:gamma_theirs}
+\end{subfigure}
+        
+\caption{Reproduction of Post et al. data analysis and extraction of isotropic Drude scattering $\Gamma$ as a function of applied field $B$}
+\label{fig:reproduction_post}
+\end{figure}
+
 We could reproduce most of the results of Legros et al. (Figure \ref{fig:drude_fit_good}).
 However, no matter how much we fine-tuned the fitting procedure, we could not produce fits looking
 as good as theirs for some of the plots (Figure \ref{fig:drude_fit_bad}). So, we tried fitting the
@@ -44,31 +77,4 @@ assert that they definitly did this to ``fix'' their fits.
     simultaneously. (b): A bad fit while fitting the real and imaginary parts of the optical
     conductivity simultaneously. (c): A fit fixed by fitting the real and imaginary parts of the
     optical conductivity separately.}
-\end{figure}
-
-%%% We can show the reproduction of Post et al. too maybe ?
-We also used data from Post et al. which we were able to reproduce quite well. 
-In this case, we had no particular issues during the fitting process except for a few extraneous points. 
-We were able to fit the data and recreate their plots that extract a field dependence for the $\omega_{p,n}$, $\omega_c$, and $\Gamma$ parameters of the Drude model.
-
-For $\omega_{p,n}$ and $\Gamma$, this is something that, in principle we wouldn't want to find in the result using Chambers' formula : 
-indeed, the scattering and the plasma frequency of the charge carriers should, 
-in principle, not depend on $B$.
-
-\begin{figure}
-\centering
-\begin{subfigure}{0.45\textwidth}
-    \includegraphics[width=\textwidth]{figures/gamma_theirs.png}
-    \caption{Their plot}
-    \label{fig:gamma_ours}
-\end{subfigure}
-\hfill
-\begin{subfigure}{0.45\textwidth}
-    \includegraphics[width=\textwidth]{figures/fitting_Drude_extracted_Gamma.pdf}
-    \caption{Our plot}
-    \label{fig:gamma_theirs}
-\end{subfigure}
-        
-\caption{Reproduction of Post et al. data analysis and extraction of isotropic Drude scattering $\Gamma$ as a function of applied field $B$}
-\label{fig:reproduction_post}
 \end{figure}
