@@ -36,7 +36,7 @@ Since the data is noisy and does not exhibit complex behavior, the fitting optim
 very challenging. We have data for different doping levels and different magnetic fields, so a
 naïve approach would be to fit the data for each doping level and each magnetic field separately.
 However, fitting only to one curve at a time would not constrain the parameters enough and would
-lead to many different combinations of parameters fitting the data well (Figure). So, we fit multiple
+lead to many different combinations of parameters fitting the data well. So, we fit multiple
 magnetic fields for each doping level simultaneously to constrain the parameters better. To make
 sure our fit makes sense, we redo the fit for different sets of magnetic fields and compare the
 fitting parameters. If they are consistent, we can be confident in the results.
@@ -48,7 +48,7 @@ try to ``kill'' any features in the curve, which leads to arbitrarily large valu
 anisotropic scattering parameters. To mitigate this, we only fitted the real part of the optical
 conductivity. Doing this, we can see that eventhough we have ignored the imaginary part, it will
 also be fitted well, without exploding the fit parameters. This is similar to what we believe
-Legros et al. did for their own fits.
+Legros et al.\cite{legros2022} did for their own fits.
 
 \begin{figure}
     \centering
