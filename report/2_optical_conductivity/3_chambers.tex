@@ -67,11 +67,19 @@ rate, respecting the symmetry of the system. It is given by
     \frac{1}{\tau(\vb{k})} = \Gamma(\vb{k}) = \Gamma_0 + \Gamma_k\abs{\cos(2\varphi)}^\nu,
 \end{equation}
 where $\varphi$ is the angle between the wavevector and the $k_x$ axis and $\Gamma_0$, $\Gamma_k$,
-and $\nu$ are adjustable parameters.
+and $\nu$ are adjustable parameters. The shape of the scattering rate dependence is shown in figure \ref{fig:log_scattering}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/polar_log_scattering.png}
+    \caption{(from Grissonnanche et al.\cite{grissonnanche2021}) Polar plot of the scattering rate $\Gamma(\vb{k})$ given by the model we used, on a logarithmic scale.}
+    \label{fig:log_scattering}
+\end{figure}
+
 
 \subsubsection{Fermi Surface}
 For the shape of the Fermi surface, we used a simple 3D tight-binding model for the Body centered
-tetragonal crystal structure of LSCO, given by
+tetragonal crystal structure of LSCO, given by :
 \begin{equation}
 \begin{aligned}
     \varepsilon(\vb{k}) = &-\mu - 2t(\cos(k_x a) + \cos(k_y a)) \\
