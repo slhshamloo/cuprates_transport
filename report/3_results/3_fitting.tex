@@ -1,4 +1,4 @@
-\subsection{Fitting the new model to the data}
+\subsection{Fitting the Chambers formula to the data}
 The Boltzmann transport model is way more complex than the Drude model, and can have a non-convex
 optimization landscape. So we used a more sophisticated global optimization algorithm, called
 differential evolution. This is a similar to a genetic algorithm, but with a few differences. It
@@ -10,6 +10,27 @@ just used the parameters from the literature. The adjustable parameters are the 
 parameters and the energy scale, which is a scaling factor for the tight binding parameters,
 defined as the value of $t$. The other tight binding parameters ($t'$, $t''$, and $t_z$) are
 defined as multiples of $t$.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/fit_example_complex}
+        \caption{Full complex fit}
+    \end{subfigure}
+    \begin{subfigure}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/fit_example_real}
+        \caption{Real part fit}
+    \end{subfigure}
+    \caption{An example of a fit to the data. (a) shows a fit using the full conductivity data,
+        while (b) shows a fit using only the real part of the conductivity. As you can see, both
+        approaches do a fine job of fitting the data. Another thing to note in these plots is the
+        large error and noise, especially in the imaginary part of the conductivity. The ``wrong''
+        curving direction in low frequencies in the imaginary part is only present in some of the
+        data, and the source is not physical.}
+    \label{fig:fitting_example}
+\end{figure}
 
 Since the data is noisy and does not exhibit complex behavior, the fitting optimization problem is
 very challenging. We have data for different doping levels and different magnetic fields, so a
