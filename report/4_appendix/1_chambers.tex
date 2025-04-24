@@ -1,0 +1,89 @@
+\section{Derivation of the Chambers Formula for Optical Conductivity}
+\label{sec:chambers}
+Starting from the Boltzmann transport equation, if we define our density function as
+$f(\vb{r}, \vb{k}; t)$ we have
+\begin{equation}
+    \pdv{f}{t} + \dot{\vb{k}}\vdot\grad_{\vb{k}}{f} + \dot{\vb{r}}\vdot\grad_{\vb{r}}{f}
+    = \qty(\pdv{f}{t})_{\text{coll}}.
+\end{equation}
+In the relaxation time approximation, we have
+\begin{equation}
+    \qty(\pdv{f}{t})_{\text{coll}}
+    = \frac{f_0(\varepsilon_{\vb{k}}) - f(\vb{r}, \vb{k};t)}{\tau(\vb{k})},
+\end{equation}
+where
+\begin{equation}
+    f_0(\varepsilon_{\vb{k}}) = \frac{1}{\exp(\beta(\varepsilon_{\vb{k}} - \mu)) + 1}
+\end{equation}
+is the equilibrium (Fermi-Dirac) distribution function. If we assume spatial uniformity
+(which is the case when we have uniform fields over our samples), using movement equations,
+we can then write
+\begin{equation}
+    \pdv{f}{t} - \frac{e}{\hbar}\qty(\vb{E} + \vb{v}(\vb{k})\cross\vb{B})\vdot\grad_{\vb{k}}{f}
+    = \frac{f_0(\varepsilon_{\vb{k}}) - f(\vb{k};t)}{\tau(\vb{k})}.
+\end{equation}
+It is more useful to solve for a perturbation in the distribution $g$, such that
+\begin{equation}
+    f(\vb{k}; t) = f_0(\varepsilon_{\vb{k}}) + g(\vb{k}; t).
+\end{equation}
+Using
+\begin{equation}
+    \vb{v}(\vb{k}) = \frac{1}{\hbar}\grad_{\vb{k}}{\varepsilon_{\vb{k}}}
+\end{equation}
+and rearranging some terms, we get
+\begin{equation}
+    \qty(\pdv{t} + \frac{1}{\tau(\vb{k})}
+    - \frac{e}{\hbar}[\vb{E}+\vb{v}(\vb{k})\cross\vb{B}]\vdot\grad_{\vb{k}})
+    g(\vb{k}; t) = \frac{e\vb{E}}{\hbar}\vdot\vb{v}(k)\dv{f_0}{\varepsilon_{\vb{k}}}.
+\end{equation}
+Since we are only interested in the first order linear response to the electric field, we can
+drop the $\vb{E}$ term on the left hand side. Also, to calculate the optical conductivity as
+a function of frequency $\omega$, we apply a Fourier transform $t\to\omega$, which gives us
+\begin{equation}
+    \qty(-i\omega + \frac{1}{\tau(\vb{k})}
+    - \frac{e}{\hbar}[\vb{v}(\vb{k})\cross\vb{B}]\vdot\grad_{\vb{k}})
+    g(\vb{k}; \omega) = \frac{e\vb{E}}{\hbar}\vdot\vb{v}(\vb{k})\dv{f_0}{\varepsilon_{\vb{k}}}.
+\end{equation}
+Now, we plug in the cyclotron equation of motion
+\begin{equation}
+    \dv{k}{s} = -\frac{e}{\hbar}\vb{v}(\vb{k})\cross\vb{B}
+\end{equation}
+and parametrize the path $\vb{k}(s)$ with $s$ (which can be equal to time).
+\begin{equation}
+    \qty(-i\omega + \frac{1}{\tau(\vb{k})} + \dv{s})g(\vb{k}; \omega)
+    = \frac{e\vb{E}}{\hbar}\vdot\vb{v}(\vb{k})\dv{f_0}{\varepsilon_{\vb{k}}}
+\end{equation}
+Integrating, we get
+\begin{equation}
+    g(\vb{k(s_0)}; \omega) = \dv{f_0}{\varepsilon_{\vb{k}}}e\vb{E}\vdot\int_{-\infty}^{s_0}
+    \dd{s}\vb{v}(\vb{k}(s))\exp{i\omega(s_0 - s) - \int_s^{s_0}\frac{\dd{s'}}{\tau(\vb{k}(s'))}}.
+\end{equation}
+Using the fact that the orbit is periodic, we can just set $s_0$ to zero.
+
+The current density is given by
+\begin{equation}
+    \vb{J} = -e\int\frac{\dd{\vb{k}}}{(2\pi)^d}\vb{v}(\vb{k})g(\vb{k}; \omega),
+\end{equation}
+where $d$ is the dimensionality of the system (the equilibtrium current vanishes).
+Defining the conductivity tensor,
+\begin{equation}
+    \sigma_{ab} = \frac{J_a}{E_b} = -e\int\frac{\dd{\vb{k}}}{(2\pi)^d}
+    v_a(\vb{k})\pdv{g(\vb{k}; \omega)}{E_b(\vb{\omega})}.
+\end{equation}
+Inserting the expression for $g$ and flipping the bounds of the integrals (to get a more
+straightforward calculation), we get
+\begin{equation}
+    \sigma_{ab} = -\frac{e^2}{(2\pi)^d}\int\dd{\vb{k}}\qty(-\dd{f_0}{\varepsilon_{\vb{k}}})
+    \int_0^\infty\dd{s}v_a(\vb{k})v_b(\vb{k}(s))\dv{f_0}{\varepsilon_{\vb{k}}}
+    \exp{i\omega s - \int_0^s\frac{\dd{s'}}{\tau(\vb{k}(s'))}}.
+\end{equation}
+This is the full form of the Chambers formula. However, in normal experimental conditions,
+the temperature is much lower than the Fermi temperature, so we can approximate the Fermi-Dirac
+distribution as a step function. This means that the integral over the wavevectors can be reduced
+to an integral over the Fermi surface. Defining $\hat{v}_a\equiv v_a/v$, we finally get the formula
+used in our analysis:
+\begin{equation}
+    \sigma_{ab} = -\frac{e^2}{(2\pi)^d}\int_{\mathrm{FS}}\dd{\vb{k}}
+    \int_0^\infty\dd{s}\hat{v}_a(\vb{k})v_b(\vb{k}(s))\dv{f_0}{\varepsilon_{\vb{k}}}
+    \exp{i\omega s - \int_0^s\frac{\dd{s'}}{\tau(\vb{k}(s'))}}
+\end{equation}

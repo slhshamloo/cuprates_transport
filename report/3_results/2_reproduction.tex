@@ -1,0 +1,80 @@
+\subsection{Reproduction of the Drude fits}
+To start the reproduction procedure, we first used data from the predecessor to Legros et al., a 2021
+paper by Post et al.\cite{post2021} We did this because more of the fitting parameters were available
+and the data was more well behaved, so we could use it as a better starting point for developing our
+tools.
+
+We were able to reproduce the results of Post et al. quite well.  In this case, we had no particular
+issues during the fitting process except for a few extraneous points (see Figure
+\ref{fig:reproduction_post} for a comparison). We were able to fit the data
+and recreate their plots that extract a field dependence for the $\omega_{p,n}$, $\omega_c$,
+and $\Gamma$ parameters of the Drude model.
+
+The apparent $B$-dependence of $\omega_{p,n}$ and $\Gamma$ is surprising.
+Indeed, in a metal, the scattering rate and the plasma frequency of the charge carriers should in principle not depend on $B$. 
+We suspect that this is because the Drude formula doesn't capture the microscopic details of LSCO.
+
+\begin{figure}
+\centering
+\begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\textwidth]{figures/gamma_theirs}
+    \caption{Their plot}
+    \label{fig:gamma_ours}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.45\textwidth}
+    \includegraphics[width=\textwidth]{figures/fitting_Drude_extracted_Gamma.pdf}
+    \caption{Our plot}
+    \label{fig:gamma_theirs}
+\end{subfigure}
+        
+\caption{Reproduction of Post et al. data analysis and extraction of isotropic Drude scattering $\Gamma$ for different magnetic fields $B$}
+\label{fig:reproduction_post}
+\end{figure}
+
+We could reproduce most of the results of Legros et al. (Figure \ref{fig:drude_fit_good}).
+However, no matter how much we fine-tuned the fitting procedure, we could not produce fits looking
+as good as theirs for some of the plots (Figure \ref{fig:drude_fit_bad}). So, we tried fitting the
+real part and the imaginary part of the optical conductivity separately, and we could produce
+similar-looking fits. Extracting the parameters from these fits and comparing them to the parameters
+extracted from the fits of Legros et al., we found that the parameters were consistent. This leads
+us to believe this is indeed what Legros et al. did in their analysis (although they did not mention
+it in their paper).
+
+Fitting the real and imaginary parts separately is not ``correct'' in some sense, but since the
+imaginary part of the optical conductivity is dominated by a superconducting singularity, fitting
+it separately can be a reasonable choice. This line of reasoning breaks down when there is not a
+large singularity due to superconductivity, but most of these cases are well-fitted. Although, there
+does exist a few cases with little superconductivity, but bad fits with simultaniously fitting the real
+and imaginary parts of the optical conductivity.
+
+To conclude, the fitting procedure of Legros et al. is badly documented and we cannot be completely
+sure of their method. However, we could reproduce their results by fitting the real and imaginary
+parts of the optical conductivity separately. This might be used as another objection to this paper,
+but since we lack their full parameter output and details about their fitting procedure, we do not
+assert that they definitly did this to ``fix'' their fits.
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \includegraphics[width=\textwidth]{figures/drude_fit_good.pdf}
+        \caption{Good fit}
+        \label{fig:drude_fit_good}
+    \end{subfigure}
+    \begin{subfigure}{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/drude_fit_bad.pdf}
+        \caption{Bad fit}
+        \label{fig:drude_fit_bad}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{figures/drude_fit_fixed.pdf}
+        \caption{Fixed fit}
+        \label{fig:drude_fit_bad}
+    \end{subfigure}
+    \caption{(a): A good fit while fitting the real and imaginary parts of the optical conductivity
+    simultaneously. (b): A bad fit while fitting the real and imaginary parts of the optical
+    conductivity simultaneously. (c): A fit fixed by fitting the real and imaginary parts of the
+    optical conductivity separately.}
+\end{figure}

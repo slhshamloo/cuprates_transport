@@ -11,6 +11,32 @@ doc/readme_units_conversion_ADMR.pdf
 
 .vscode/
 
+# User generated data and plots
+data/**/*.dat
+data/**/*.csv
+plots/**/*.pdf
+plots/**/*.csv
+plots/**/*.dat
+plots/**/*.npy
+
+data_processing/**/*.dat
+data_processing/**/*.pickle
+
+user_plots/*
+user_data/*
+
+# Latex generated files
+latex/*.pdf
+latex/*.aux
+latex/*.log
+latex/*.out
+latex/*.synctex.gz
+latex/*.toc
+latex/*.bbl
+latex/*.blg
+latex/*.fdb_latexmk
+latex/*.fls
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -97,6 +123,18 @@ ipython_config.py
 
 # pyenv
 .python-version
+
+# latex
+report/**/*.aux
+report/**/*.log
+report/**/*.out
+report/**/*.synctex.gz
+report/**/*.toc
+report/**/*.bbl
+report/**/*.blg
+report/**/*.fdb_latexmk
+report/**/*.fls
+report/report.pdf
 
 # pipenv
 #   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.

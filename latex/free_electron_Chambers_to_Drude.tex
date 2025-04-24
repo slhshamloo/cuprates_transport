@@ -1,0 +1,139 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath,empheq,physics}
+\title{The Equivalence of Chambers and Drude Formulas for Calculating the Optical
+	Conductivity of Free Electrons}
+\author{Matéo Rivera, Saleh Shamloo Ahmadi}
+\date{November 23, 2024}
+
+\newcommand{\ddfrac}[2]{{\displaystyle\frac{\displaystyle #1}{\displaystyle #2}}}
+\newcommand\myeq{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily IBPx2}}}{=}}}
+
+\begin{document}
+\maketitle
+In the following, we show that the Chambers and Drude formulas give the same result when
+calculating the conductivity of free electrons at low temperatures ($T \ll T_F$). We consider the
+case of finite frequency fields and a 3D dispersion relation (though the same is true for zero
+frequency and other dimensionalities). To simplify the calculations, we assume the magnetic field is
+applied in the $z$ direction and compare the diagonal $\sigma_{xx}$ and off-diagonal $\sigma_{xy}$
+components of the conductivity tensor. We also assume a uniform scattering rate, $\Gamma = 1/\tau$.
+This can introduce differences between the two formulas, but we are only interested in the simplest
+free electron case.
+
+\section{Drude}
+The Drude model gives
+\begin{equation}
+	\dv{\va{p}}{t} = -e\qty(\va{E} + \va{v}\cross\va{B}) - \frac{\va{p}}{\tau},
+\end{equation}
+and using the definitions
+\begin{empheq}[left=\empheqlbrace]{align}
+	\va{p} &= m^*\va{v}, \\
+	\va{J} &= -ne\va{v},
+\end{empheq}
+we can a system of equations for the current density $\va{J}$ and the electric field $\va{E}$:
+\begin{empheq}[left=\empheqlbrace]{align}
+	\pdv{J_x}{t} &= \frac{e}{m^*}\qty(neE_x - J_yB_z) - \frac{J_x}{\tau}, \\
+	\pdv{J_y}{t} &= \frac{e}{m^*}\qty(neE_y + J_xB_z) - \frac{J_y}{\tau}.
+\end{empheq}
+Doing a fourier transform $\pdv*{t} \to i\omega$, defining the cyclotron frequency
+$\omega_c = eB/m^\star$, and replacing the mean free time $\tau$ with
+the scattering rate $\Gamma$, we get
+\begin{empheq}[left=\empheqlbrace]{align}
+	(i\omega + \Gamma) J_x + \omega_c J_y &= \frac{ne^2}{m^*}E_x, \label{eq:drude1} \\
+	(i\omega + \Gamma) J_y - \omega_c J_x &= \frac{ne^2}{m^*}E_y. \label{eq:drude2}
+\end{empheq}
+Substituting $J_y$ from \eqref{eq:drude2} into \eqref{eq:drude1} and solving for $J_x$ gives
+\begin{equation}
+	J_x = \frac{ne^2\qty[(i\omega + \Gamma)E_x - \omega_c E_y]}{m^*\qty[(i\omega + \Gamma)^2 + \omega_c^2]}
+\end{equation}
+which gives the diagonal and off-diagonal components of the conductivity tensor as
+\begin{empheq}[left=\empheqlbrace]{align}
+	\sigma_{xx}^{\text{Drude}} &= \frac{ne^2(i\omega + \Gamma)}{m^*\qty[(i\omega + \Gamma)^2 + \omega_c^2]}, \\
+	\sigma_{xy}^{\text{Drude}} &= -\frac{ne^2\omega_c}{m^*\qty[(i\omega + \Gamma)^2 + \omega_c^2]}.
+\end{empheq}
+
+\section{Chambers}
+The Chambers formula for the optical conductivity at low temperatures is
+\begin{equation}
+	\sigma_{ab} = \frac{e^2}{\hbar}\int_{\va{k}}^{FS}\int_0^{\infty}\mathop{ds}
+		\hat{v}_a(\va{k})v_b(\va{k}(s))\exp{-i\omega s - \int_0^s \frac{\mathop{ds'}}{\tau \va{k}(s')}}.
+\end{equation}
+In 3D, the integral over the Fermi surface generates a factor of $1/(2\pi)^3$. Also, because of the
+electron spin, There is always a factor of $2$ when integrating over the states of the Fermi
+surface.
+
+The first order path of the electrons is a helix with $\phi(s) = \phi(0) - \omega_c s$ where $\phi$
+is the azimuthal angle. Also, we are considering a free electron dispersion, it is isotropic in
+$\va{k}$-space:
+\begin{itemize}
+	\item We have the energy dispersion : $E(k) = \ddfrac{\hbar^2k^2}{2m^*}$
+	\item The Fermi surface is a sphere of radius $k_F$ with $\va{k} = k_F\vu{e}_r$
+	\item On the FS, $\va{v}_F = \ddfrac{1}{\hbar}\ddfrac{\partial E(\va{k})}{\partial\va{k}} = \ddfrac{1}{\hbar}\ddfrac{\hbar^2}{2m^*}2k_F\vu{e}_r = \ddfrac{\hbar}{m^*}k_F\vu{e}_r$
+\end{itemize} 
+Now, we apply the Chambers formula:
+\begin{align}
+	\sigma_{xx}^{\text{Chambers}} &= \frac{2e^2}{\hbar(2\pi)^3}\displaystyle\int_{\va{k}}^{FS}\mathop{d\va{k}}\int_0^{\infty}\mathop{ds}
+		\hat{v}_x(\va{k})v_x(\va{k}(s))
+		\exp{-i\omega s - \int_0^s \frac{\mathop{ds'}}{\tau \va{k}(s')}} \\
+	&= \frac{e^2}{4\hbar\pi^3}\displaystyle\int_{\va{k}}^{FS}\mathop{d\va{k}}\int_0^{\infty}\mathop{ds}
+	\hat{v}_x(\va{k})v_x(\va{k}(s))
+		e^{-(i\omega + \Gamma)s} \\
+	&= \frac{e^2}{4\hbar\pi^3}\displaystyle\int_{\va{k}, k = k_F}^{}\mathop{d\va{k}} \hat{v}_x(\va{k}) 
+		\int_0^{\infty}\mathop{ds} v_x(\va{k}(s)) e^{-(i\omega + \Gamma)s} \\
+	&= \begin{aligned}[t] \frac{e^2}{4\hbar\pi^3}&\left(\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi}\ k_F^2\sin{\theta}\mathop{d\phi}\mathop{d\theta}(\vu{e}_r(\theta, \phi)\cdot \vu{e}_x)\right. \\
+		&\left.\int_0^{\infty}\mathop{ds} v_F (\vu{e}_r(\theta(s), \phi(s))\cdot \vu{e}_x) e^{-(i\omega + \Gamma)s}\right) \end{aligned} \\
+	&= \begin{aligned}[t] \frac{e^2}{4\hbar\pi^3}k_F^2v_F&\left(\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi}\ \sin{\theta}\mathop{d\phi}\mathop{d\theta} \sin{\theta}\cos{\phi} \right. \\
+		&\left.\int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \sin{\theta(s)}\cos{\phi(s)}\right) \end{aligned} \\
+	&= \begin{aligned}[t] \frac{e^2}{4\hbar\pi^3}k_F^2v_F&\left(\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi} \mathop{d\phi}\mathop{d\theta} \sin^3{\theta}\cos{\phi} \right. \\
+		&\left.\int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \cos{(\phi - \omega_c s)}\right) \end{aligned} \\
+	&\myeq\ \frac{e^2}{4\hbar\pi^3}k_F^2v_F\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi} \mathop{d\phi}\mathop{d\theta} \sin^3{\theta}\frac{(i\omega + \Gamma)\cos^2{\phi}+\omega_c\cos\phi\sin\phi}{(i\omega + \Gamma)^2 + \omega_c^2} \\
+	&= \frac{k_F^2v_Fe^2}{4\hbar\pi^3}\frac{\frac{4}{3}\pi(i\omega + \Gamma) + 0}{(i\omega + \Gamma)^2 + \omega_c^2} = \frac{k_F^2v_Fe^2}{3\hbar\pi^2}\frac{i\omega + \Gamma}{(i\omega + \Gamma)^2 + \omega_c^2}
+\end{align}
+Finally, substituting $v_F$ in terms of $k_F$, we get
+\begin{equation}
+	\sigma_{xx}^{\text{Chambers}} = \frac{k_F^3e^2}{3\pi^2m^*}\frac{i\omega + \Gamma}{(i\omega + \Gamma)^2 + \omega_c^2}.
+\end{equation}
+But since $k_F = \qty(3\pi^2n)^{1/3}$ in 3D, the Chambers formula gives the exact same result as the
+Drude formula for the diagonal component of the conductivity tensor.
+
+The derivation for the off-diagonal component is similar:
+\begin{align}
+	\sigma_{xy}^{\text{Chambers}} &= \frac{e^2}{4\pi^3}\displaystyle\int_{\va{k}, k = k_F}^{}\mathop{d\va{k}} \hat{v}_x(\va{k}) 
+		\int_0^{\infty}\mathop{ds} v_y(\va{k}(s)) e^{-(i\omega + \Gamma)s} \\
+	&= \begin{aligned}[t] \frac{\hbar^2 e^2}{4\pi^3}&\left(\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi}\ k_F^2\sin{\theta}\mathop{d\phi}\mathop{d\theta}(\vu{e}_r(\theta, \phi)\cdot \vu{e}_x)\right. \\
+		&\left.\int_0^{\infty}\mathop{ds} v_F (\vu{e}_r(\theta(s), \phi(s))\cdot \vu{e}_y) e^{-(i\omega + \Gamma)s}\right) \end{aligned} \\
+	&= \begin{aligned}[t] \frac{\hbar^2 e^2}{4\pi^3}k_F^2v_F&\left(\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi}\ \sin{\theta}\mathop{d\phi}\mathop{d\theta} \sin{\theta}\cos{\phi} \right. \\
+		&\left.\int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \sin{\theta(s)}\sin{\phi(s)}\right) \end{aligned} \\
+	&= \begin{aligned}[t] \frac{\hbar^2 e^2}{4\pi^3}k_F^2v_F&\left(\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi} \mathop{d\phi}\mathop{d\theta} \sin^3{\theta}\cos{\phi} \right. \\
+		&\left.\int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \sin{(\phi - \omega_c s)}\right) \end{aligned} \\
+	&\myeq\ \frac{\hbar^2 e^2}{4\pi^3}k_F^2v_F\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi} \mathop{d\phi}\mathop{d\theta} \sin^3{\theta}\frac{(i\omega + \Gamma)\cos{\phi}\sin\phi-\omega_c\cos^2\phi}{(i\omega + \Gamma)^2 + \omega_c^2} \\
+	&= \frac{k_F^2v_Fe^2}{4\hbar\pi^3}\frac{0 - \frac{4}{3}\pi\omega_c}{(i\omega + \Gamma)^2 + \omega_c^2} = -\frac{\hbar^2 k_F^2v_Fe^2}{3\pi^2}\frac{\omega_c}{(i\omega + \Gamma)^2 + \omega_c^2}
+\end{align}
+\begin{equation}
+	\sigma_{xy}^{\text{Chambers}} = -\frac{k_F^3e^2}{3\pi^2m^*}\frac{\omega_c}{(i\omega + \Gamma)^2 + \omega_c^2}
+\end{equation}
+Again, this gives the same result as the Drude formula when we substitute $k_F = \qty(3\pi^2n)^{1/3}$.
+\appendix
+\renewcommand{\thesection}{Appendix}
+\section{Integration by parts}
+We can explicitly compute the integration by parts:
+\begin{align}
+	I &= \int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \cos{(\phi - \omega_c s)} \\
+	&= \left[ \frac{e^{-(i\omega + \Gamma)s}}{-(i\omega + \Gamma)} \cos{(\phi - \omega_c s)} \right]_{0}^{\infty} + \frac{\omega_c}{i\omega + \Gamma} \int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \sin{(\phi - \omega_c s)} \\
+	&= \frac{1}{i\omega + \Gamma}\left(\cos{\phi} + \omega_c \int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \sin{(\phi - \omega_c s)}\right) \\
+	&= \begin{aligned}[t]\frac{1}{i\omega + \Gamma}&\left(\cos{\phi} + \omega_c \left(\left[\frac{e^{-(i\omega + \Gamma)s}}{-(i\omega + \Gamma)} \sin{(\phi - \omega_c s)} \right]_{0}^{\infty}\right.\right. \\
+		&\left.\left.-\frac{\omega_c}{i\omega + \Gamma}\int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \cos{(\phi - \omega_c s)}\right) \right) \end{aligned}\\
+	& = \frac{1}{i\omega + \Gamma}\left(\cos{\phi} + \omega_c \left(\frac{\sin\phi}{i\omega + \Gamma}-\frac{\omega_c}{i\omega + \Gamma} I\right) \right)\\
+\end{align}
+Thus
+\begin{equation}
+	\left(1+ \frac{\omega_c^2}{(i\omega + \Gamma)^2}\right)I = \frac{\cos{\phi}}{i\omega + \Gamma}+\frac{\omega_c\sin\phi}{(i\omega + \Gamma)^2},
+\end{equation}
+and it follows that
+\begin{equation}
+	I = \frac{(i\omega + \Gamma)\cos{\phi}+\omega_c\sin\phi}{(i\omega + \Gamma)^2 + \omega_c^2}.
+\end{equation}
+The integral with the $\sin$ function is similar; this time, we get
+\begin{equation}
+	\int_0^{\infty}\mathop{ds} e^{-(i\omega + \Gamma)s} \sin{(\phi - \omega_c s)} = \frac{(i\omega + \Gamma)\sin{\phi}-\omega_c\cos\phi}{(i\omega + \Gamma)^2 + \omega_c^2}.
+\end{equation}
+\end{document}

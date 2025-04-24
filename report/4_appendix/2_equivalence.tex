@@ -1,0 +1,69 @@
+\section{Mathematical Equivalence of Drude and Chambers for Free Electrons}
+\label{sec:equivalence}
+For free electrons, the first order path is a helix with $\phi(s) = \phi(0) - \omega_c s$
+where $\phi$ is the azimuthal angle. Also, we are considering a free electron dispersion, it is
+isotropic in $\vb{k}$-space:
+\begin{itemize}
+	\item We have the energy dispersion: $E(k) = \ddfrac{\hbar^2k^2}{2m^*}$
+	\item The Fermi surface is a sphere of radius $k_F$ with $\vb{k} = k_F\vu{e}_r$
+	\item On the FS, $\vb{v}_F = \ddfrac{1}{\hbar}\ddfrac{\partial E(\vb{k})}{\partial\vb{k}} = \ddfrac{1}{\hbar}\ddfrac{\hbar^2}{2m^*}2k_F\vu{e}_r = \ddfrac{\hbar}{m^*}k_F\vu{e}_r$
+\end{itemize} 
+Now, we apply the Chambers formula:
+\begin{align}
+	\sigma_{xx}^{\text{Chambers}} &= \frac{2e^2}{\hbar(2\pi)^3}\displaystyle\int_{\vb{k}}^{FS}\mathop{d\vb{k}}\int_0^{\infty}\mathop{ds}
+		\hat{v}_x(\vb{k})v_x(\vb{k}(s))
+		\exp{-i\omega s - \int_0^s \frac{\mathop{ds'}}{\tau \vb{k}(s')}} \\
+	&= \frac{e^2}{4\hbar\pi^3}\displaystyle\int_{\vb{k}}^{FS}\mathop{d\vb{k}}\int_0^{\infty}\mathop{ds}
+	\hat{v}_x(\vb{k})v_x(\vb{k}(s))
+		e^{(i\omega - \Gamma)s} \\
+	&= \frac{e^2}{4\hbar\pi^3}\displaystyle\int_{\vb{k}, k = k_F}^{}\mathop{d\vb{k}} \hat{v}_x(\vb{k}) 
+		\int_0^{\infty}\mathop{ds} v_x(\vb{k}(s)) e^{(i\omega - \Gamma)s} \\
+	&= \begin{aligned}[t] \frac{e^2}{4\hbar\pi^3}&\left(\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi}\ k_F^2\sin{\theta}\mathop{d\phi}\mathop{d\theta}(\vu{e}_r(\theta, \phi)\cdot \vu{e}_x)\right. \\
+		&\left.\int_0^{\infty}\mathop{ds} v_F (\vu{e}_r(\theta(s), \phi(s))\cdot \vu{e}_x) e^{(i\omega - \Gamma)s}\right) \end{aligned} \\
+	&= \begin{aligned}[t] \frac{e^2}{4\hbar\pi^3}k_F^2v_F&\left(\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi}\ \sin{\theta}\mathop{d\phi}\mathop{d\theta} \sin{\theta}\cos{\phi} \right. \\
+		&\left.\int_0^{\infty}\mathop{ds} e^{(i\omega - \Gamma)s} \sin{\theta(s)}\cos{\phi(s)}\right) \end{aligned} \\
+	&= \begin{aligned}[t] \frac{e^2}{4\hbar\pi^3}k_F^2v_F&\left(\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi} \mathop{d\phi}\mathop{d\theta} \sin^3{\theta}\cos{\phi} \right. \\
+		&\left.\int_0^{\infty}\mathop{ds} e^{(i\omega - \Gamma)s} \cos{(\phi - \omega_c s)}\right) \end{aligned} \\
+	&\myeq\ \frac{e^2}{4\hbar\pi^3}k_F^2v_F\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi} \mathop{d\phi}\mathop{d\theta} \sin^3{\theta}\frac{(\Gamma - i\omega)\cos^2{\phi}+\omega_c\cos\phi\sin\phi}{(\Gamma - i\omega)^2 + \omega_c^2} \\
+	&= \frac{k_F^2v_Fe^2}{4\hbar\pi^3}\frac{\frac{4}{3}\pi(\Gamma - i\omega) + 0}{(\Gamma - i\omega)^2 + \omega_c^2} = \frac{k_F^2v_Fe^2}{3\hbar\pi^2}\frac{\Gamma - i\omega}{(\Gamma - i\omega)^2 + \omega_c^2}
+\end{align}
+Next, substituting $v_F$ in terms of $k_F$, we get
+\begin{equation}
+	\sigma_{xx}^{\text{Chambers}} = \frac{k_F^3e^2}{3\pi^2m^*}\frac{\Gamma - i\omega}{(\Gamma - i\omega)^2 + \omega_c^2}.
+\end{equation}
+Finally, $k_F = \qty(3\pi^2n)^{1/3}$ in 3D, so it gives
+\begin{equation}
+    \sigma_{xx}^{\text{Chambers}} = \frac{n e^2}{3m^*}\frac{\Gamma - i\omega}{(\Gamma - i\omega)^2 + \omega_c^2}.
+\end{equation}
+
+The derivation for the off-diagonal component is similar:
+\begin{align}
+	\sigma_{xy}^{\text{Chambers}} &= \frac{e^2}{4\pi^3}\displaystyle\int_{\vb{k}, k = k_F}^{}\mathop{d\vb{k}} \hat{v}_x(\vb{k}) 
+		\int_0^{\infty}\mathop{ds} v_y(\vb{k}(s)) e^{(i\omega - \Gamma)s} \\
+	&= \begin{aligned}[t] \frac{\hbar^2 e^2}{4\pi^3}&\left(\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi}\ k_F^2\sin{\theta}\mathop{d\phi}\mathop{d\theta}(\vu{e}_r(\theta, \phi)\cdot \vu{e}_x)\right. \\
+		&\left.\int_0^{\infty}\mathop{ds} v_F (\vu{e}_r(\theta(s), \phi(s))\cdot \vu{e}_y) e^{(i\omega - \Gamma)s}\right) \end{aligned} \\
+	&= \begin{aligned}[t] \frac{\hbar^2 e^2}{4\pi^3}k_F^2v_F&\left(\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi}\ \sin{\theta}\mathop{d\phi}\mathop{d\theta} \sin{\theta}\cos{\phi} \right. \\
+		&\left.\int_0^{\infty}\mathop{ds} e^{(i\omega - \Gamma)s} \sin{\theta(s)}\sin{\phi(s)}\right) \end{aligned} \\
+	&= \begin{aligned}[t] \frac{\hbar^2 e^2}{4\pi^3}k_F^2v_F&\left(\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi} \mathop{d\phi}\mathop{d\theta} \sin^3{\theta}\cos{\phi} \right. \\
+		&\left.\int_0^{\infty}\mathop{ds} e^{(i\omega - \Gamma)s} \sin{(\phi - \omega_c s)}\right) \end{aligned} \\
+	&\myeq\ \frac{\hbar^2 e^2}{4\pi^3}k_F^2v_F\displaystyle\int_{\phi = 0}^{2\pi}\int_{\theta = 0}^{\pi} \mathop{d\phi}\mathop{d\theta} \sin^3{\theta}\frac{(\Gamma - i\omega)\cos{\phi}\sin\phi-\omega_c\cos^2\phi}{(\Gamma - i\omega)^2 + \omega_c^2} \\
+	&= \frac{k_F^2v_Fe^2}{4\hbar\pi^3}\frac{0 - \frac{4}{3}\pi\omega_c}{(\Gamma - i\omega)^2 + \omega_c^2} = -\frac{\hbar^2 k_F^2v_Fe^2}{3\pi^2}\frac{\omega_c}{(\Gamma - i\omega)^2 + \omega_c^2}
+\end{align}
+\begin{equation}
+	\sigma_{xy}^{\text{Chambers}} = -\frac{k_F^3e^2}{3\pi^2m^*}\frac{\omega_c}{(\Gamma - i\omega)^2 + \omega_c^2}
+    = -\frac{n e^2}{3m^*}\frac{\omega_c}{(\Gamma - i\omega)^2 + \omega_c^2}
+\end{equation}
+
+After all these calculations, to convert to the circular basis for comparing to the Drude
+model,\footnote{we rederived the Drude model in Cartesian basis too, it is just simpler to compare
+to the circular basis already stated in the report and writing extra calculations for the Drude
+model here is redundant.} we use the Kramers--Kronig relations.
+\begin{align}
+    \sigma_{ll/rr} &= \sigma_{xx} + i\sigma_{xy} = \frac{n e^2}{3m^*}
+    \frac{\Gamma - i(\omega + \omega_c)}{(\Gamma - i\omega)^2 + \omega_c^2} \\
+    &= \frac{n e^2}{3m^*}\frac{(\Gamma - i\omega) - i\omega_c}
+    {[(\Gamma - i\omega) + i\omega_c][(\Gamma - i\omega) - i\omega_c]} \\
+    &= \frac{n e^2}{3m^*}\frac{1}{\Gamma - i(\omega - \omega_c)} = \frac{n e^2}{3m^*}\frac{i}{\omega - \omega_c + i\Gamma}
+\end{align}
+When defining $\omega^2_{\mathrm{p,n}} = \frac{ne^2}{\epsilon_0 m^*}$, This is exactly the same as
+the Drude formula in the circular basis, without the effect of supercunductivity.

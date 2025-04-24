@@ -1,0 +1,65 @@
+\documentclass[12pt]{article}
+\usepackage[a4paper,fancysections,titlepage]{polytechnique}
+\usepackage{amsmath,amssymb,bm,empheq,graphicx,hyperref,pifont,
+siunitx,subcaption,upgreek,xcolor}
+\usepackage[italicdiff]{physics}
+\usepackage[justification=centering]{caption}
+\usepackage{indentfirst}
+\usepackage{subcaption}
+\usepackage{graphicx}
+\usepackage[section]{placeins}
+
+\newcommand{\emptybox}{$\square$}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
+\hspace{-2.5pt}}
+
+\hypersetup{colorlinks=true, urlcolor=cyan}
+\newcommand{\angstrom}{\textup{\AA}}
+\newcommand{\ddfrac}[2]{{\displaystyle\frac{\displaystyle #1}{\displaystyle #2}}}
+\newcommand\myeq{\mathrel{\overset{\makebox[0pt]{\mbox{\normalfont\tiny\sffamily IBPx2}}}{=}}}
+
+\title{Quantum Criticallity in Cuprate Superconductors: PRL Report}
+\author{Matéo Rivera, Saleh Shamloo Ahmadi\\Supervisor: Gaël Grissonnanche}
+\date{March 17, 2025}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\input{1_introduction/1_lsi}
+\input{1_introduction/2_hightc}
+\input{1_introduction/3_qcp}
+\input{1_introduction/4_optical_conductivity}
+\input{1_introduction/5_boltzmann}
+\input{1_introduction/6_goals}
+
+\newpage
+\section{Optical Conductivity}
+\input{2_optical_conductivity/1_what_is_optical_conductivity}
+\input{2_optical_conductivity/2_drude_modelling}
+\input{2_optical_conductivity/3_chambers}
+
+\newpage
+\section{Codes and tools developed}
+In the following, all conductivities are expressed in $mS.cm^{-1}$
+\input{2bis_code_and_tools/1_plot_digitization}
+\input{2bis_code_and_tools/2_from_ADMR_to_optical_conductivity}
+
+\newpage
+\section{Results}
+\input{3_results/1_drude_vs_chambers}
+\input{3_results/2_reproduction}
+\input{3_results/2bis_qualitative_understanding}
+\input{3_results/3_fitting}
+\input{3_results/4_effective_mass}
+\input{3_results/5_discussion}
+
+\bibliographystyle{plain}
+\bibliography{ref}
+
+\appendix
+\input{4_appendix/1_chambers}
+\input{4_appendix/2_equivalence}
+
+\end{document}
